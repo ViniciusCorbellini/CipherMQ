@@ -2,7 +2,9 @@ package com.manocorbas.ciphermq.server;
 
 import java.net.Socket;
 
-public class ClientHandler implements Runnable{
+import com.manocorbas.ciphermq.common.Message;
+
+public class ClientHandler implements Runnable, ClientConnection{
 
     private Socket client;
     private TopicManager tm;
@@ -14,7 +16,12 @@ public class ClientHandler implements Runnable{
 
     @Override
     public void run() {
-        
+        //TODO
+    }
+
+    @Override
+    public void send(Message message){
+        //TODO
     }
     
 }
