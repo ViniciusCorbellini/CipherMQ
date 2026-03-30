@@ -44,4 +44,16 @@ public class TopicManager {
             client.send(message);
         }
     }
+
+    public void createTopic(String topic) {
+        topics.putIfAbsent(topic, new CopyOnWriteArrayList<>());
+    }
+
+    public void removeClient(ClientConnection client) {
+        for (Map.Entry<String, List<ClientConnection>> entry : topics.entrySet()) {
+            List<ClientConnection> list = entry.getValue();
+
+            list.removeAll(List.of(client));
+        }
+    }
 }

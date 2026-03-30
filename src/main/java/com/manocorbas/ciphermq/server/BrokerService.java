@@ -26,14 +26,15 @@ public class BrokerService {
                 topicManager.publish(msg);
             }
 
-            // TODO
-            // case CREATE_TOPIC -> {
-            //     topicManager.createTopic(msg.topic());
-            // }
+            case CREATE_TOPIC -> {
+                topicManager.createTopic(msg.topic());
+            }
+
+            default -> throw new IllegalArgumentException("Unexpected value: " + msg.action());
         }
     }
-    // TODO
-    // public void disconnect(ClientConnection client) {
-    //     topicManager.removeClient(client);
-    // }
+
+    public void disconnect(ClientConnection client) {
+        topicManager.removeClient(client);
+    }
 }

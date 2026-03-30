@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Broker {
+public class Server {
 
     private int port;
 
-    public Broker(int port) {
+    public Server(int port) {
         this.port = port;
     }
 
@@ -16,6 +16,7 @@ public class Broker {
 
         // =========== Dep Inj ==============
         TopicManager tm = new TopicManager();
+        BrokerService bs = new BrokerService(tm);
         // ==================================
 
         ServerSocket ss = new ServerSocket(port);
@@ -28,7 +29,7 @@ public class Broker {
             new Thread(
                 new ClientHandler(
                     client,
-                    tm
+                    bs
                 )
             ).start();
             
