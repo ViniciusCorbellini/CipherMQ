@@ -8,6 +8,7 @@ import java.net.Socket;
 import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.util.JsonFrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
+import com.manocorbas.ciphermq.util.log.Log;
 
 public class ClientHandler implements Runnable, ClientConnection {
 
@@ -17,6 +18,8 @@ public class ClientHandler implements Runnable, ClientConnection {
     private InputStream in;
     private OutputStream out;
 
+    private String COMPONENT = "CLIENTHANDLER";
+
     public ClientHandler(Socket client, BrokerService brokerService) {
         this.client = client;
         this.brokerService = brokerService;
@@ -24,11 +27,15 @@ public class ClientHandler implements Runnable, ClientConnection {
 
     @Override
     public void run() {
+        Log.debug(COMPONENT, "ClientHandler Running");
+
         try {
             in = client.getInputStream();
             out = client.getOutputStream();
 
             while (true) {
+                Log.info(COMPONENT, "Waiting for message");
+
                 String json = JsonFrameUtil.receive(in);
 
                 Message msg = JsonUtil.fromJson(json, Message.class);
@@ -37,8 +44,9 @@ public class ClientHandler implements Runnable, ClientConnection {
             }
 
         } catch (Exception e) {
-            System.out.println("Cliente desconectado");
+            Log.error(COMPONENT, "Client disconnected", e);
         } finally {
+            Log.debug(COMPONENT, "Cleanup");
             cleanup();
         }
     }
@@ -60,7 +68,10 @@ public class ClientHandler implements Runnable, ClientConnection {
 
         try {
             client.close();
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
+    }
+
+    public Socket getClient() {
+        return client;
     }
 }

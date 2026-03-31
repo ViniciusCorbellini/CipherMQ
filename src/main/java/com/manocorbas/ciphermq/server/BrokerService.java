@@ -1,16 +1,21 @@
 package com.manocorbas.ciphermq.server;
 
 import com.manocorbas.ciphermq.common.Message;
+import com.manocorbas.ciphermq.util.log.Log;
 
 public class BrokerService {
 
     private final TopicManager topicManager;
+
+    private String COMPONENT = "BROKERSERVICE";
 
     public BrokerService(TopicManager topicManager) {
         this.topicManager = topicManager;
     }
 
     public void handle(Message msg, ClientConnection client) {
+
+        Log.debug(COMPONENT, "Handling message | action: " + msg.action());
 
         switch (msg.action()) {
 
@@ -35,6 +40,7 @@ public class BrokerService {
     }
 
     public void disconnect(ClientConnection client) {
+        Log.debug(COMPONENT, "Removing client from topics");
         topicManager.removeClient(client);
     }
 }

@@ -27,7 +27,7 @@ public class ClientConnection {
             startListening();
 
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao conectar", e);
+            throw new RuntimeException("Error atempting to connect", e);
         }
     }
 
@@ -44,7 +44,7 @@ public class ClientConnection {
                 }
 
             } catch (Exception e) {
-                System.out.println("Conexão encerrada");
+                System.out.println("Connection Closed");
             }
         }).start();
     }
