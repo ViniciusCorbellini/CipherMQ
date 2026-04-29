@@ -8,21 +8,27 @@ import com.manocorbas.ciphermq.util.log.Log;
 // TODO: GUI (URGENT)
 public class ClientCli {
 
-
     public static void start(String host, int port) {
         String COMPONENT = "CLIENTCLI";
-        
+
         Log.debug(COMPONENT, "Client CLI started");
 
         Client client = new Client();
         client.connect(host, port);
 
         Log.info(COMPONENT, "Connected to " + host + ":" + port);
-        
+
         Scanner input = new Scanner(System.in);
 
-        while (true) {
+        boolean running = true;
+
+        while (running) {
             try {
+                if (!input.hasNextLine()) {
+                    Log.warn(COMPONENT, "STDIN closed, exiting...");
+                    break;
+                }
+
                 String line = input.nextLine();
 
                 Log.debug(COMPONENT, "input read: " + line);
@@ -38,7 +44,7 @@ public class ClientCli {
                 }
 
                 else if (line.equals("exit")) {
-                    break;
+                    running = false;
                 }
 
                 else {

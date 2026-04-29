@@ -1,0 +1,24 @@
+services:
+  server:
+    build: .
+    container_name: ciphermq-server
+    command: srv --port 8080
+    ports:
+      - "8080:8080"
+    networks:
+      - ciphernet
+
+
+  client:
+    build: .
+    command: cli --connect server:8080
+    stdin_open: true   # habilita o terminal interativo no Docker
+    tty: true          # equivalente a -t
+    depends_on:
+      - server
+    networks:
+      - ciphernet
+
+networks:
+  ciphernet:
+    driver: bridge

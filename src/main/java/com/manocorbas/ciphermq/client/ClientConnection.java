@@ -8,6 +8,7 @@ import java.net.Socket;
 import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.util.JsonFrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
+import com.manocorbas.ciphermq.util.log.Log;
 
 // Parte de rede do cliente
 // TODO: GUI
@@ -17,13 +18,16 @@ public class ClientConnection {
     private InputStream in;
     private OutputStream out;
 
-    public void connect(String host, int port) {
-        try {
+    private String COMPONENT = "CLIENTCONNECTION";
 
+    public void connect(String host, int port) {
+        try {            
+            
             socket = new Socket(host, port);
             in = socket.getInputStream();
             out = socket.getOutputStream();
-
+            
+            Log.info(COMPONENT, "Client " + socket.getRemoteSocketAddress());
             startListening();
 
         } catch (Exception e) {

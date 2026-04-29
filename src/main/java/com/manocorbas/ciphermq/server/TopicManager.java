@@ -80,7 +80,7 @@ public class TopicManager {
             List<ClientConnection> list = entry.getValue();
             
             System.out.println("Topic: " + entry.getKey());
-            list.forEach(client -> System.out.println("Client: " + ((ClientHandler) client).getClient().getLocalAddress().getHostAddress()));
+            list.forEach(client -> System.out.println("Client: " + ((ClientHandler) client).getClient().getInetAddress().getHostAddress()));
             System.out.println("==============");
         }
     }
