@@ -44,7 +44,7 @@ public class ClientHandler implements Runnable, ClientConnection {
             }
 
         } catch (Exception e) {
-            Log.error(COMPONENT, "Client disconnected", e);
+            Log.info(COMPONENT, "Client disconnected, Handler closing");
         } finally {
             Log.debug(COMPONENT, "Cleanup");
             cleanup();

@@ -28,11 +28,11 @@ public class BrokerService {
             }
 
             case PUBLISH -> {
-                topicManager.publish(msg);
+                topicManager.publish(msg, client);
             }
 
             case CREATE_TOPIC -> {
-                topicManager.createTopic(msg.topic());
+                topicManager.createTopic(msg.topic(), client);
             }
 
             default -> {

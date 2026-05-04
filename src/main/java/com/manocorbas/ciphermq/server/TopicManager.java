@@ -10,6 +10,8 @@ import com.manocorbas.ciphermq.util.log.Log;
 
 public class TopicManager {
 
+    // TODO: resposta ao cliente em casos de erro
+
     private Map<String, List<ClientConnection>> topics = new ConcurrentHashMap<>();
 
     private String COMPONENT = "TOPICMANAGER";
@@ -48,22 +50,36 @@ public class TopicManager {
         }
     }
 
-    public void publish(Message message) {
-        Log.info(COMPONENT, "Publishing message: " + message.content() + " | Topic: " + message.topic());
+    public void publish(Message message, ClientConnection pub) {
 
         List<ClientConnection> clients = topics.get(message.topic());
 
-        if (clients == null)
+        if (clients == null){
+            Log.info(COMPONENT, "Invalid Topic: " + message.topic());
             return;
+        }
+
+        if(!topicContainsClient(message.topic(), pub)){
+            Log.info(COMPONENT, "Client is not subscribed to topic: " + message.topic());
+            return;
+        }
+
+        Log.info(COMPONENT, "Publishing message for ( " + clients.size() + " ) clients : " + message.content() + " | Topic: " + message.topic());
 
         for (ClientConnection client : clients) {
             client.send(message);
         }
     }
 
-    public void createTopic(String topic) {
+    public void createTopic(String topic, ClientConnection clientConnection) {
         Log.info(COMPONENT, "Creating topic: " + topic);
         topics.putIfAbsent(topic, new CopyOnWriteArrayList<>());
+
+        subscribe(topic, clientConnection);
+    }
+
+    public boolean topicContainsClient(String topic, ClientConnection client){
+        return this.topics.get(topic).contains(client);
     }
 
     public void removeClient(ClientConnection client) {

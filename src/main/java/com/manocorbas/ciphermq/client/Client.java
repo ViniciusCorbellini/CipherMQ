@@ -57,4 +57,8 @@ public class Client {
 
         connection.send(msg);
     }
+    
+    public void close() {
+        connection.close();
+    }
 }

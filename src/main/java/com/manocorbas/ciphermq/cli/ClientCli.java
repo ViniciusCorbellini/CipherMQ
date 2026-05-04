@@ -36,6 +36,16 @@ public class ClientCli {
                     client.subscribe(topic);
                 }
 
+                else if (line.startsWith("unsub ")) {
+                    String topic = line.substring(6);
+                    client.unsubscribe(topic);
+                }
+
+                else if (line.startsWith("create ")) {
+                    String topic = line.substring(7);
+                    client.createTopic(topic);
+                }
+
                 else if (line.startsWith("pub ")) {
                     String[] parts = line.split(" ", 3);
                     client.publish(parts[1], parts[2]);
@@ -43,11 +53,14 @@ public class ClientCli {
 
                 else if (line.equals("exit")) {
                     running = false;
+                    client.close();
                 }
 
                 else {
                     System.out.println("Commands:");
                     System.out.println("sub <topic>");
+                    System.out.println("unsub <topic>");
+                    System.out.println("create <topic>");
                     System.out.println("pub <topic> <msg>");
                     System.out.println("exit");
                 }

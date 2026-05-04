@@ -17,6 +17,9 @@ public class ClientConnection {
     private Socket socket;
     private InputStream in;
     private OutputStream out;
+    
+    private Thread listenThread;
+    private volatile boolean running = true;
 
     private String COMPONENT = "CLIENTCONNECTION";
 
@@ -40,10 +43,10 @@ public class ClientConnection {
 
         Log.info(COMPONENT, "Started to listen");
 
-        new Thread(() -> {
+        this.listenThread = new Thread(() -> {
             try {
 
-                while (true) {
+                while (running) {
                     Log.debug(COMPONENT, "Listening for any messages");
                     String json = JsonFrameUtil.receive(in);
 
@@ -53,9 +56,15 @@ public class ClientConnection {
                 }
 
             } catch (Exception e) {
-                Log.error(COMPONENT, "Error while listening", e);
+                if(running){
+                    Log.error(COMPONENT, "Error while listening", e);
+                } else{
+                    Log.info(COMPONENT, "ListenThread interrupted");
+                }
             }
-        }).start();
+        });
+
+        listenThread.start();
     }
 
     public void send(Message message) {
@@ -69,6 +78,17 @@ public class ClientConnection {
             Log.error(COMPONENT, "Error while sending message", e);
             e.printStackTrace();
         }
+    }
+
+    public void close() {
+
+        Log.info(COMPONENT, "Closing Connection");
+
+        try {
+            running = false;
+            socket.close();
+        } catch (IOException ignored) {}
+
     }
 
     private void printMessage(Message m){
