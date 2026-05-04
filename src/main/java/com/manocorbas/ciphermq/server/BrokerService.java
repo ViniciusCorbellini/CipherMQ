@@ -35,7 +35,10 @@ public class BrokerService {
                 topicManager.createTopic(msg.topic());
             }
 
-            default -> throw new IllegalArgumentException("Unexpected value: " + msg.action());
+            default -> {
+                Log.debug(COMPONENT, "Unexpected value read");
+                throw new IllegalArgumentException("Unexpected value: " + msg.action());
+            }
         }
     }
 

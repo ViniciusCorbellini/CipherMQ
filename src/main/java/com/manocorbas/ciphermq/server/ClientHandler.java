@@ -59,6 +59,7 @@ public class ClientHandler implements Runnable, ClientConnection {
             String json = JsonUtil.toJson(message);
             JsonFrameUtil.send(out, json);
         } catch (IOException e) {
+            Log.error(COMPONENT, "Error while sending message", e);
             throw new RuntimeException(e);
         }
     }

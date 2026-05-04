@@ -16,8 +16,6 @@ public class ClientCli {
         Client client = new Client();
         client.connect(host, port);
 
-        Log.info(COMPONENT, "Connected to " + host + ":" + port);
-
         Scanner input = new Scanner(System.in);
 
         boolean running = true;

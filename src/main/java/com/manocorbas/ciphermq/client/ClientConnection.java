@@ -27,19 +27,24 @@ public class ClientConnection {
             in = socket.getInputStream();
             out = socket.getOutputStream();
             
-            Log.info(COMPONENT, "Client " + socket.getRemoteSocketAddress());
+            Log.info(COMPONENT, "Client connected: " + socket.getRemoteSocketAddress());
             startListening();
 
         } catch (Exception e) {
+            Log.error(COMPONENT, "Error atempting to connect", e);
             throw new RuntimeException("Error atempting to connect", e);
         }
     }
 
     private void startListening() {
+
+        Log.info(COMPONENT, "Started to listen");
+
         new Thread(() -> {
             try {
 
                 while (true) {
+                    Log.debug(COMPONENT, "Listening for any messages");
                     String json = JsonFrameUtil.receive(in);
 
                     Message msg = JsonUtil.fromJson(json, Message.class);
@@ -48,16 +53,20 @@ public class ClientConnection {
                 }
 
             } catch (Exception e) {
-                System.out.println("Connection Closed");
+                Log.error(COMPONENT, "Error while listening", e);
             }
         }).start();
     }
 
     public void send(Message message) {
+
+        Log.info(COMPONENT, "Sending message: " + message.content());
+
         try {
             String json = JsonUtil.toJson(message);
             JsonFrameUtil.send(out, json);
         } catch (IOException e) {
+            Log.error(COMPONENT, "Error while sending message", e);
             e.printStackTrace();
         }
     }
