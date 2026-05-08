@@ -4,10 +4,22 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum ActionType {
+    // pub-sub
     SUBSCRIBE("sub"),
     UNSUBSCRIBE("unsub"),
     PUBLISH("pub"),
-    CREATE_TOPIC("cr_top");
+    CREATE_TOPIC("cr_top"),
+
+    // 3way register handshake 
+    REGISTER("reg"),
+    CONNECT("con"),
+
+    SERVER_HELLO("srv_hll"),
+    CLIENT_READY("clt_rdy"),
+
+    // general purpose
+    ERROR("err");
+
 
     private final String val;
 

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class JsonFrameUtil {
+public class FrameUtil {
 
     public static void send(OutputStream out, String json) throws IOException {
 

@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import com.manocorbas.ciphermq.common.Message;
-import com.manocorbas.ciphermq.util.JsonFrameUtil;
+import com.manocorbas.ciphermq.util.FrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
 import com.manocorbas.ciphermq.util.log.Log;
 
@@ -48,7 +48,7 @@ public class ClientConnection {
 
                 while (running) {
                     Log.debug(COMPONENT, "Listening for any messages");
-                    String json = JsonFrameUtil.receive(in);
+                    String json = FrameUtil.receive(in);
 
                     Message msg = JsonUtil.fromJson(json, Message.class);
 
@@ -73,7 +73,7 @@ public class ClientConnection {
 
         try {
             String json = JsonUtil.toJson(message);
-            JsonFrameUtil.send(out, json);
+            FrameUtil.send(out, json);
         } catch (IOException e) {
             Log.error(COMPONENT, "Error while sending message", e);
             e.printStackTrace();
