@@ -1,37 +1,50 @@
 package com.manocorbas.ciphermq.client;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 
 import com.manocorbas.ciphermq.common.Message;
+import com.manocorbas.ciphermq.exceptions.HandShakeException;
+import com.manocorbas.ciphermq.protocols.handshake.ClientHandShake;
+import com.manocorbas.ciphermq.protocols.handshake.HandshakeResult;
 import com.manocorbas.ciphermq.util.FrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
 import com.manocorbas.ciphermq.util.log.Log;
 
 // Parte de rede do cliente
-// TODO: GUI
 public class ClientConnection {
 
+    // TODO: ping pong to see if server is healthy (heartbeat)
+
+    // Net
     private Socket socket;
-    private InputStream in;
-    private OutputStream out;
-    
+    private ClientHandShake clientHandShake;
+
+    // threads
     private Thread listenThread;
     private volatile boolean running = true;
 
     private String COMPONENT = "CLIENTCONNECTION";
 
-    public void connect(String host, int port) {
-        try {            
-            
-            socket = new Socket(host, port);
-            in = socket.getInputStream();
-            out = socket.getOutputStream();
-            
+    public HandshakeResult connect(ConnectRequest c) {
+        try {
+            Log.info(COMPONENT, "Atempting to connect to broker");
+            socket = new Socket(c.host(), c.port());
             Log.info(COMPONENT, "Client connected: " + socket.getRemoteSocketAddress());
+
+            Log.info(COMPONENT, "Atempting to handshake");
+            clientHandShake = new ClientHandShake(socket);
+            
+            HandshakeResult result = clientHandShake.doHandshake(c.username());
+
+            if (!result.success()) {
+                Log.info(COMPONENT, "Unsuccessful Handshake");
+                throw new HandShakeException("Unsuccessful Handshake");
+            }
+            
             startListening();
+
+            return result;
 
         } catch (Exception e) {
             Log.error(COMPONENT, "Error atempting to connect", e);
@@ -48,7 +61,7 @@ public class ClientConnection {
 
                 while (running) {
                     Log.debug(COMPONENT, "Listening for any messages");
-                    String json = FrameUtil.receive(in);
+                    String json = FrameUtil.receive(socket.getInputStream());
 
                     Message msg = JsonUtil.fromJson(json, Message.class);
 
@@ -56,9 +69,9 @@ public class ClientConnection {
                 }
 
             } catch (Exception e) {
-                if(running){
+                if (running) {
                     Log.error(COMPONENT, "Error while listening", e);
-                } else{
+                } else {
                     Log.info(COMPONENT, "ListenThread interrupted");
                 }
             }
@@ -73,7 +86,7 @@ public class ClientConnection {
 
         try {
             String json = JsonUtil.toJson(message);
-            FrameUtil.send(out, json);
+            FrameUtil.send(socket.getOutputStream(), json);
         } catch (IOException e) {
             Log.error(COMPONENT, "Error while sending message", e);
             e.printStackTrace();
@@ -87,11 +100,12 @@ public class ClientConnection {
         try {
             running = false;
             socket.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
 
     }
 
-    private void printMessage(Message m){
+    private void printMessage(Message m) {
         System.out.println("======= Message =======");
         System.out.println("Topic: " + m.topic() + " | Action: " + m.action());
         System.out.println("Content: ");

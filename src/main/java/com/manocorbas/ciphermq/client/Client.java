@@ -2,16 +2,28 @@ package com.manocorbas.ciphermq.client;
 
 import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
+import com.manocorbas.ciphermq.exceptions.HandShakeException;
+import com.manocorbas.ciphermq.protocols.handshake.HandshakeResult;
 import com.manocorbas.ciphermq.util.log.Log;
 
 public class Client {
+    
+    // Client
+    private String username;
+    private String sessionId;
 
+    // Net
     private final ClientConnection connection = new ClientConnection();
 
+    // log
     private final String COMPONENT = "CLIENT";
 
-    public void connect(String host, int port) {
-        connection.connect(host, port);
+    public void connect(ConnectRequest c) throws HandShakeException {
+
+        HandshakeResult result = connection.connect(c);
+
+        this.username = result.clientName();
+        this.sessionId = result.sessionId();
     }
 
     public void subscribe(String topic) {

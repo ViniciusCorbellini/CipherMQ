@@ -9,9 +9,9 @@ import com.manocorbas.ciphermq.server.registry.SessionIdGenerator;
 import com.manocorbas.ciphermq.util.FrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
 
-public class ServerHandShake { 
-    
-    //TODO: ERROR RESPONSE
+public class ServerHandShake {
+
+    // TODO: ERROR RESPONSE (HandShakeException)
 
     private final Socket socket;
 
@@ -22,16 +22,17 @@ public class ServerHandShake {
     /**
      * Executes the whole server-side MQ client registry
      */
-    private HandshakeResult doHandshake() throws Exception {
+    public HandshakeResult doHandshake() throws IOException {
 
-        // FIST STEP: Client sends his <name> and <action> (REGISTER || CONNECT)
+        // FIST STEP: Client sends his <name>
         Message m = waitForClientHello();
+        String clientName = m.content();
 
         // SECOND STEP: BROKER generates a random session id
         String sessionId = SessionIdGenerator.generate();
 
         // THIRD STEP: BROKER sends his hello (acks the user hello and sends the id)
-        sendHello(sessionId);        
+        sendHello(sessionId);
 
         // FOURTH STEP:
         // Client stores session id
@@ -41,8 +42,23 @@ public class ServerHandShake {
         // so the server can finally REGISTER | CONNECT
         boolean clientReady = waitForReady();
 
-        return new HandshakeResult(sessionId, clientReady, m.action());
+        return new HandshakeResult(clientName, sessionId, clientReady);
+    }
 
+    private Message waitForClientHello() throws IOException {
+        String json = FrameUtil.receive(socket.getInputStream());
+
+        Message m = JsonUtil.fromJson(json, Message.class);
+
+        return m;
+    }
+
+    private void sendHello(String sessionId) throws IOException {
+        Message m = new Message(ActionType.SERVER_HELLO, null, sessionId);
+
+        String json = JsonUtil.toJson(m);
+
+        FrameUtil.send(socket.getOutputStream(), json);
     }
 
     private boolean waitForReady() throws IOException {
@@ -51,25 +67,5 @@ public class ServerHandShake {
         Message m = JsonUtil.fromJson(json, Message.class);
 
         return m.action() == ActionType.CLIENT_READY;
-    }
-
-    private Message waitForClientHello() throws Exception {
-        String json = FrameUtil.receive(socket.getInputStream());
-
-        Message m = JsonUtil.fromJson(json, Message.class);
-
-        if(m.action() != ActionType.CONNECT && m.action() != ActionType.REGISTER){
-            throw new Exception("Invalid action");
-        }
-
-        return m;
-    }
-
-    private void sendHello(String sessionId) throws IOException{
-        Message m = new Message(ActionType.SERVER_HELLO, null, sessionId);
-
-        String json = JsonUtil.toJson(m);
-
-        FrameUtil.send(socket.getOutputStream(), json);
     }
 }

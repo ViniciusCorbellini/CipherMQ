@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import com.manocorbas.ciphermq.server.registry.ClientRegistry;
 import com.manocorbas.ciphermq.util.log.Log;
 
 public class Server {
@@ -19,7 +20,9 @@ public class Server {
 
         // =========== Dep Inj ==============
         TopicManager tm = new TopicManager();
-        BrokerService bs = new BrokerService(tm);
+        ClientRegistry cr = new ClientRegistry();
+
+        BrokerService bs = new BrokerService(tm, cr);
         // ==================================
 
         ServerSocket ss = null;

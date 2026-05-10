@@ -1,47 +1,45 @@
 package com.manocorbas.ciphermq.server;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.util.log.Log;
 
+/**
+ * Nota sobre a mudança: Agora a reponsabilidade de publicar mensagens não
+ * pertence mais ao TM,
+ * ela é do broker service e da sessão do cliente. O TM apenas gerencia os
+ * usuários de um tópico
+ */
 public class TopicManager {
 
     // TODO: resposta ao cliente em casos de erro
 
-    private Map<String, List<ClientConnection>> topics = new ConcurrentHashMap<>();
+    private Map<String, Set<String>> topics = new ConcurrentHashMap<>();
 
     private String COMPONENT = "TOPICMANAGER";
 
-    public void subscribe(String topic, ClientConnection client) {
+    public void subscribe(String topic, String clientId) {
         Log.info(COMPONENT, "Subscribing client in topic: " + topic);
 
-        topics.putIfAbsent(topic, new CopyOnWriteArrayList<>());
+        topics.computeIfAbsent(topic, t -> ConcurrentHashMap.newKeySet()).add(clientId);
 
-        List<ClientConnection> list = topics.get(topic);
-
-        if (!list.contains(client)) {
-            list.add(client);
-        }
-
-        Log.debug(COMPONENT, "Topic list: " + list.toString());
+        Log.debug(COMPONENT, "Topic list: " + topics.get(topic).toString());
         printTopics();
     }
 
-    public void unsubscribe(String topic, ClientConnection client) {
+    public void unsubscribe(String topic, String clientId) {
         Log.info(COMPONENT, "Unubscribing client in topic: " + topic);
 
-        List<ClientConnection> list = topics.get(topic);
+        Set<String> list = topics.get(topic);
 
         if (list == null)
             return;
 
-        list.remove(client);
+        list.remove(clientId);
 
-        Log.debug(COMPONENT, "Topic list: " + list.toString());
+        Log.debug(COMPONENT, "Topic list: " + topics.get(topic).toString());
         printTopics();
 
         if (list.isEmpty()) {
@@ -50,53 +48,27 @@ public class TopicManager {
         }
     }
 
-    public void publish(Message message, ClientConnection pub) {
-
-        List<ClientConnection> clients = topics.get(message.topic());
-
-        if (clients == null){
-            Log.info(COMPONENT, "Invalid Topic: " + message.topic());
-            return;
-        }
-
-        if(!topicContainsClient(message.topic(), pub)){
-            Log.info(COMPONENT, "Client is not subscribed to topic: " + message.topic());
-            return;
-        }
-
-        Log.info(COMPONENT, "Publishing message for ( " + clients.size() + " ) clients : " + message.content() + " | Topic: " + message.topic());
-
-        for (ClientConnection client : clients) {
-            client.send(message);
-        }
+    public Set<String> getSubscribers(String topic) {
+        return topics.getOrDefault(topic, Set.of());
     }
 
-    public void createTopic(String topic, ClientConnection clientConnection) {
+    public void createTopic(String topic, String clientId) {
         Log.info(COMPONENT, "Creating topic: " + topic);
-        topics.putIfAbsent(topic, new CopyOnWriteArrayList<>());
+        topics.computeIfAbsent(topic, t -> ConcurrentHashMap.newKeySet()).add(clientId);
 
-        subscribe(topic, clientConnection);
+        subscribe(topic, clientId);
     }
 
-    public boolean topicContainsClient(String topic, ClientConnection client){
-        return this.topics.get(topic).contains(client);
-    }
-
-    public void removeClient(ClientConnection client) {
-        Log.info(COMPONENT, "Removing client: " + client);
-        for (Map.Entry<String, List<ClientConnection>> entry : topics.entrySet()) {
-            List<ClientConnection> list = entry.getValue();
-
-            list.removeAll(List.of(client));
-        }
+    public boolean topicContainsClient(String topic, String clientId) {
+        return topics.get(topic).contains(clientId);
     }
 
     private void printTopics() {
-        for (Map.Entry<String, List<ClientConnection>> entry : topics.entrySet()) {
-            List<ClientConnection> list = entry.getValue();
-            
+        for (Map.Entry<String, Set<String>> entry : topics.entrySet()) {
+            Set<String> list = entry.getValue();
+
             System.out.println("Topic: " + entry.getKey());
-            list.forEach(client -> System.out.println("Client: " + ((ClientHandler) client).getClient().getInetAddress().getHostAddress()));
+            list.forEach(client -> System.out.println("Client: " + client));
             System.out.println("==============");
         }
     }

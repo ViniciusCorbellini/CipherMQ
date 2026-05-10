@@ -16,26 +16,16 @@ public class ClientHandShake {
         this.socket = socket;
     }
 
-    public HandshakeResult register(String username) throws Exception {
-        // Client can now store his sess id
-        return doHandshake(ActionType.REGISTER, username);
-    }
-
-    public HandshakeResult connect(String username) throws Exception {
-        // Client can now store his sess id
-        return doHandshake(ActionType.CONNECT, username);
-    }
-
     /**
      * Executes the whole client-side MQ client registry
      */
-    private HandshakeResult doHandshake(ActionType action, String username) throws Exception {
+    public HandshakeResult doHandshake(String clientId) throws Exception {
 
         // avoids blocking threads and zombie clients
         socket.setSoTimeout(5000);
 
-        // FIST STEP: Client sends his <name> and <action> (REGISTER || CONNECT)
-        sendHello(action, username);
+        // FIST STEP: Client sends his <name> and CONNECT
+        sendHello(ActionType.CONNECT, clientId);
 
         // SECOND STEP (Server Side):
         // BROKER generates a new session ID, which leads us to
@@ -55,8 +45,10 @@ public class ClientHandShake {
         // so the server can finally REGISTER | CONNECT
         sendReady();
 
-        return new HandshakeResult(sessionId, true, action);
+        // resets to an infinite timeout
+        socket.setSoTimeout(0); 
 
+        return new HandshakeResult(clientId, sessionId, true);
     }
 
     // Step 1: CLIENT_HELLO

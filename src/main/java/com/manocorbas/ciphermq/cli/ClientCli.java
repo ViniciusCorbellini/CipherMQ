@@ -3,22 +3,29 @@ package com.manocorbas.ciphermq.cli;
 import java.util.Scanner;
 
 import com.manocorbas.ciphermq.client.Client;
+import com.manocorbas.ciphermq.client.ConnectRequest;
+import com.manocorbas.ciphermq.exceptions.HandShakeException;
 import com.manocorbas.ciphermq.util.log.Log;
 
 // TODO: GUI (URGENT)
 public class ClientCli {
 
+    private static Scanner input = new Scanner(System.in);
+
+    private final static String COMPONENT = "CLIENTCLI";
+
     public static void start(String host, int port) {
-        String COMPONENT = "CLIENTCLI";
 
         Log.debug(COMPONENT, "Client CLI started");
-
-        Client client = new Client();
-        client.connect(host, port);
-
-        Scanner input = new Scanner(System.in);
-
         boolean running = true;
+
+        Client client = null;
+        try {
+            client = initClient(host, port);
+        } catch (Exception e) {
+            e.printStackTrace();
+            running = false;
+        }
 
         while (running) {
             try {
@@ -57,18 +64,45 @@ public class ClientCli {
                 }
 
                 else {
-                    System.out.println("Commands:");
-                    System.out.println("sub <topic>");
-                    System.out.println("unsub <topic>");
-                    System.out.println("create <topic>");
-                    System.out.println("pub <topic> <msg>");
-                    System.out.println("exit");
+                    printCommands();
                 }
+
             } catch (Exception e) {
                 Log.error(COMPONENT, "Exception caught", e);
             }
             System.out.println();
         }
         input.close();
+    }
+
+    private static void printCommands() {
+        System.out.println("Commands:");
+        System.out.println("sub <topic>");
+        System.out.println("unsub <topic>");
+        System.out.println("create <topic>");
+        System.out.println("pub <topic> <msg>");
+        System.out.println("exit");
+    }
+
+    private static Client initClient(String host, int port) throws Exception {
+        Log.debug(COMPONENT, "Initializing client");
+
+        System.out.print("Username: ");
+        String username = input.nextLine();
+
+        Client client = new Client();
+
+        ConnectRequest request = new ConnectRequest(host, port, username);
+
+        try {
+            client.connect(request);
+        }
+
+        catch (HandShakeException e) {
+            Log.error(host, username, e);
+            throw new Exception("Erro while initializing client");
+        }
+
+        return client;
     }
 }
