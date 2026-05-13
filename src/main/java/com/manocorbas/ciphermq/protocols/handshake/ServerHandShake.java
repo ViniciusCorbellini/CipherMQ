@@ -2,9 +2,12 @@ package com.manocorbas.ciphermq.protocols.handshake;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.security.PublicKey;
 
 import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
+import com.manocorbas.ciphermq.protocols.certificate.CertificateAuthority;
+import com.manocorbas.ciphermq.protocols.certificate.ClientCertificate;
 import com.manocorbas.ciphermq.server.registry.SessionIdGenerator;
 import com.manocorbas.ciphermq.util.FrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
@@ -22,13 +25,26 @@ public class ServerHandShake {
     /**
      * Executes the whole server-side MQ client registry
      */
-    public HandshakeResult doHandshake() throws IOException {
+    public HandshakeResult doHandshake(PublicKey acPublicKey) throws IOException {
 
         // FIST STEP: Client sends his <name>
         Message m = waitForClientHello();
-        String clientName = m.content();
 
-        // SECOND STEP: BROKER generates a random session id
+        // SECOND STEP: Client's certificate validation; Session ID generation
+        ClientCertificate cert;
+        try {
+            cert = ClientCertificate.deserialize(m.content());
+            boolean valid = CertificateAuthority.verifyCertificate(cert, acPublicKey);
+            if (!valid) {
+                // sendError("INVALID_CERTIFICATE"); TODO
+                return new HandshakeResult(null, null, false);
+            }
+        } catch (Exception e) {
+            //  sendError("MALFORMED_CERTIFICATE"); TODO
+            return new HandshakeResult(null, null, false);
+        }
+
+        String clientName = cert.clientId();
         String sessionId = SessionIdGenerator.generate();
 
         // THIRD STEP: BROKER sends his hello (acks the user hello and sends the id)

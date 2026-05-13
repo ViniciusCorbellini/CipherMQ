@@ -17,6 +17,10 @@ public class CommandParser {
         if (mode.equalsIgnoreCase("cli")) {
             return parseClient(args);
         }
+        
+        if (mode.equalsIgnoreCase("sign")) {
+            return parseSign(args);
+        }
 
         throw new IllegalArgumentException("Invalid Mode: " + mode);
     }
@@ -46,5 +50,9 @@ public class CommandParser {
         }
 
         return ParsedCommand.client(host, port);
+    }
+
+    private static ParsedCommand parseSign(String[] args) {
+        return ParsedCommand.sign();
     }
 }

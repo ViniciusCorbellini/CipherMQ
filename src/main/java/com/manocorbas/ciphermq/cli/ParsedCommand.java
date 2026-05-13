@@ -4,12 +4,14 @@ public class ParsedCommand {
 
     public enum Mode {
         SERVER,
-        CLIENT
+        CLIENT,
+        SIGN
     }
 
     private Mode mode;
     private int port;
     private String host;
+    private String username;
 
     public static ParsedCommand server(int port) {
         ParsedCommand cmd = new ParsedCommand();
@@ -26,8 +28,15 @@ public class ParsedCommand {
         return cmd;
     }
 
+    public static ParsedCommand sign() {
+        ParsedCommand cmd = new ParsedCommand();
+        cmd.mode = Mode.SIGN;
+        return cmd;
+    }
+
     public Mode getMode() { return mode; }
     public int getPort() { return port; }
     public String getHost() { return host; }
+    public String getUsername() { return username; }
     
 }

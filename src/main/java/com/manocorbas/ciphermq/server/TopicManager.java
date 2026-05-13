@@ -59,6 +59,10 @@ public class TopicManager {
         subscribe(topic, clientId);
     }
 
+    public boolean topicExists(String topic){
+        return topics.get(topic) != null;
+    }
+
     public boolean topicContainsClient(String topic, String clientId) {
         return topics.get(topic).contains(clientId);
     }

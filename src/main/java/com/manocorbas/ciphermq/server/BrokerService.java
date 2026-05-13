@@ -3,6 +3,7 @@ package com.manocorbas.ciphermq.server;
 import java.util.Set;
 
 import com.manocorbas.ciphermq.common.Message;
+import com.manocorbas.ciphermq.exceptions.NonExistentTopicException;
 import com.manocorbas.ciphermq.exceptions.UnauthorizedAccessException;
 import com.manocorbas.ciphermq.server.registry.ClientRegistry;
 import com.manocorbas.ciphermq.server.registry.ClientSession;
@@ -22,7 +23,7 @@ public class BrokerService {
         this.clientRegistry = clientRegistry;
     }
 
-    public void handle(Message msg, ClientSession client) throws UnauthorizedAccessException  {
+    public void handle(Message msg, ClientSession client) throws UnauthorizedAccessException, NonExistentTopicException  {
 
         Log.debug(COMPONENT, "Handling message | action: " + msg.action());
 
@@ -56,22 +57,27 @@ public class BrokerService {
         session.detachConnection();
     }
 
-    private void publish(Message message, ClientSession con) throws UnauthorizedAccessException {
+    private void publish(Message message, ClientSession con) throws UnauthorizedAccessException, NonExistentTopicException {
 
         String topic = message.topic();
 
+        if(!topicManager.topicExists(topic)){
+            throw new NonExistentTopicException(topic + " does not exist");
+        }
+
         if (!topicManager.topicContainsClient(topic, con.getClientId())) {
-            throw new UnauthorizedAccessException(con.getClientId() + "does not belong in topic: " + topic);
+            throw new UnauthorizedAccessException(con.getClientId() + " does not belong in topic: " + topic);
         }
 
         Set<String> subscribers = topicManager.getSubscribers(message.topic());
+
+        Log.debug(COMPONENT, "Enqueueing message to " + subscribers.size() + " users (including publisher)");
 
         for (String clientId : subscribers) {
             ClientSession session = clientRegistry.getOrCreate(clientId);
 
             session.enqueue(message);
 
-            Log.debug(COMPONENT, "Session online: " + session.isOnline());
             if (session.isOnline()) {
                 session.flushQueue();
             }

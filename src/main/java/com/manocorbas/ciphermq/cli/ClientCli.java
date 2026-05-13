@@ -3,6 +3,8 @@ package com.manocorbas.ciphermq.cli;
 import java.util.Scanner;
 
 import com.manocorbas.ciphermq.client.Client;
+import com.manocorbas.ciphermq.client.ClientCredentials;
+import com.manocorbas.ciphermq.client.ClientSetup;
 import com.manocorbas.ciphermq.client.ConnectRequest;
 import com.manocorbas.ciphermq.exceptions.HandShakeException;
 import com.manocorbas.ciphermq.util.log.Log;
@@ -88,19 +90,20 @@ public class ClientCli {
         Log.debug(COMPONENT, "Initializing client");
 
         System.out.print("Username: ");
-        String username = input.nextLine();
+        String username = input.nextLine().strip();
 
+        ClientCredentials creds = ClientSetup.load(username);
         Client client = new Client();
 
-        ConnectRequest request = new ConnectRequest(host, port, username);
+        ConnectRequest request = new ConnectRequest(host, port, creds);
 
         try {
             client.connect(request);
         }
 
         catch (HandShakeException e) {
-            Log.error(host, username, e);
-            throw new Exception("Erro while initializing client");
+            Log.error(COMPONENT, e.getMessage(), e);
+            throw new Exception("Error while initializing client");
         }
 
         return client;

@@ -3,6 +3,8 @@ package com.manocorbas.ciphermq.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.KeyPair;
+import java.security.PublicKey;
 
 import com.manocorbas.ciphermq.server.registry.ClientRegistry;
 import com.manocorbas.ciphermq.util.log.Log;
@@ -18,7 +20,17 @@ public class Server {
 
     public void start() {
 
+        boolean running = true;
+
         // =========== Dep Inj ==============
+        KeyPair acPair = null;
+        try {
+            acPair = CaSetup.initAC();
+        } catch (Exception e) {
+            Log.error(COMPONENT, "Instantiating CA", e);
+        } 
+        PublicKey acPublicKey = acPair.getPublic();
+
         TopicManager tm = new TopicManager();
         ClientRegistry cr = new ClientRegistry();
 
@@ -35,8 +47,6 @@ public class Server {
 
         Log.info(COMPONENT, "Server started on -> " + ss.getInetAddress().getHostAddress() + ":" + ss.getLocalPort());
 
-        boolean running = true;
-
         while (running) {
             try {
                 Socket client = ss.accept();
@@ -47,8 +57,10 @@ public class Server {
                 new Thread(
                         new ClientHandler(
                                 client,
-                                bs))
-                        .start();
+                                bs,
+                                acPublicKey
+                        )
+                ).start();
             } catch (Exception e) {
                 Log.error(COMPONENT, "Error while accepting client", e);
             }

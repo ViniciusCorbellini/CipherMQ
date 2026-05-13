@@ -5,6 +5,7 @@ import java.net.Socket;
 
 import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
+import com.manocorbas.ciphermq.protocols.certificate.ClientCertificate;
 import com.manocorbas.ciphermq.util.FrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
 
@@ -19,13 +20,13 @@ public class ClientHandShake {
     /**
      * Executes the whole client-side MQ client registry
      */
-    public HandshakeResult doHandshake(String clientId) throws Exception {
+    public HandshakeResult doHandshake(ClientCertificate certificate) throws Exception {
 
         // avoids blocking threads and zombie clients
         socket.setSoTimeout(5000);
 
-        // FIST STEP: Client sends his <name> and CONNECT
-        sendHello(ActionType.CONNECT, clientId);
+        // FIST STEP: Client sends his certificate and CONNECT
+        sendHello(ActionType.CONNECT, certificate.serialize());
 
         // SECOND STEP (Server Side):
         // BROKER generates a new session ID, which leads us to
@@ -48,15 +49,15 @@ public class ClientHandShake {
         // resets to an infinite timeout
         socket.setSoTimeout(0); 
 
-        return new HandshakeResult(clientId, sessionId, true);
+        return new HandshakeResult(certificate.clientId(), sessionId, true);
     }
 
     // Step 1: CLIENT_HELLO
-    private void sendHello(ActionType action, String username) throws Exception {
+    private void sendHello(ActionType action, String certificateContent) throws Exception {
 
         // For now i'll use the message obj,
         // should use an HelloMessage instead (todo in the future)
-        Message hello = new Message(action, null, username);
+        Message hello = new Message(action, null, certificateContent);
 
         String json = JsonUtil.toJson(hello);
 

@@ -7,7 +7,19 @@ services:
       - "8080:8080"
     networks:
       - ciphernet
+    volumes:
+      - mq-data:/data
 
+  sign:
+    build: .
+    container_name: ciphermq-sign
+    command: sign
+    environment:
+      - SIGN_USERNAME=${SIGN_USERNAME}  # passa o arg na hora do run. ex: SIGN_USERNAME=vini && docker compose run sign
+    networks:
+      - ciphernet
+    volumes:
+      - mq-data:/data
 
   client:
     build: .
@@ -18,7 +30,12 @@ services:
       - server
     networks:
       - ciphernet
+    volumes:
+      - mq-data:/data
 
 networks:
   ciphernet:
     driver: bridge
+
+volumes:
+  mq-data: 

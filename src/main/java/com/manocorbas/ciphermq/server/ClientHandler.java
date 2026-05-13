@@ -5,9 +5,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.security.PublicKey;
 
 import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.exceptions.HandShakeException;
+import com.manocorbas.ciphermq.exceptions.NonExistentTopicException;
 import com.manocorbas.ciphermq.exceptions.UnauthorizedAccessException;
 import com.manocorbas.ciphermq.protocols.handshake.HandshakeResult;
 import com.manocorbas.ciphermq.protocols.handshake.ServerHandShake;
@@ -23,12 +25,15 @@ public class ClientHandler implements Runnable, ClientConnection {
     // Handler
     private ClientSession session;
     private BrokerService brokerService;
-    private ServerHandShake serverHandShake;
 
     // Net
     private Socket clientSocket;
     private InputStream in;
     private OutputStream out;
+
+    // protocols
+    private ServerHandShake serverHandShake;
+    private PublicKey pubKey;
 
     // thread
     private volatile boolean running = true;
@@ -36,10 +41,11 @@ public class ClientHandler implements Runnable, ClientConnection {
     // Log
     private String COMPONENT = "CLIENTHANDLER";
 
-    public ClientHandler(Socket clientSocket, BrokerService brokerService) {
+    public ClientHandler(Socket clientSocket, BrokerService brokerService, PublicKey pubKey) {
         this.clientSocket = clientSocket;
         this.brokerService = brokerService;
         this.serverHandShake = new ServerHandShake(clientSocket);
+        this.pubKey = pubKey;
     }
 
     @Override
@@ -74,9 +80,12 @@ public class ClientHandler implements Runnable, ClientConnection {
             } catch (UnauthorizedAccessException e) {
                 Log.error(COMPONENT, "Client is not subscribed to this topic", e);
 
+            } catch (NonExistentTopicException e) {
+                Log.error(COMPONENT, e.getMessage(), e);
+
             } catch (Exception e) {
                 Log.error(COMPONENT, "Unexpected error while handling client", e);
-                running = false; // geralmente você quer derrubar conexão aqui
+                running = false;
             }
         }
 
@@ -85,7 +94,7 @@ public class ClientHandler implements Runnable, ClientConnection {
 
     private ClientSession doHandShakeAndRegistry() throws IOException, HandShakeException {
         Log.info(COMPONENT, "Handshaking");
-        HandshakeResult result = serverHandShake.doHandshake();
+        HandshakeResult result = serverHandShake.doHandshake(pubKey);
 
         if (!result.success())
             throw new HandShakeException("Error while trying to do handshake");

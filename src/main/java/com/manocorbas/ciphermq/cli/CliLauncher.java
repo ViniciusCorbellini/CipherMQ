@@ -9,6 +9,7 @@ public class CliLauncher {
             switch (cmd.getMode()) {
                 case SERVER -> ServerCli.start(cmd.getPort());
                 case CLIENT -> ClientCli.start(cmd.getHost(), cmd.getPort());
+                case SIGN   -> SignCli.start();
             }
 
         } catch (Exception e) {
