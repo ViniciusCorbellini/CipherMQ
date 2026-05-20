@@ -36,11 +36,11 @@ public class ServerHandShake {
             cert = ClientCertificate.deserialize(m.content());
             boolean valid = CertificateAuthority.verifyCertificate(cert, acPublicKey);
             if (!valid) {
-                // sendError("INVALID_CERTIFICATE"); TODO
+                sendError("INVALID_CERTIFICATE");
                 return new HandshakeResult(null, null, false);
             }
         } catch (Exception e) {
-            //  sendError("MALFORMED_CERTIFICATE"); TODO
+            sendError("MALFORMED_CERTIFICATE");
             return new HandshakeResult(null, null, false);
         }
 
@@ -59,6 +59,14 @@ public class ServerHandShake {
         boolean clientReady = waitForReady();
 
         return new HandshakeResult(clientName, sessionId, clientReady);
+    }
+
+    private void sendError(String errorMessage) throws IOException {
+        Message m = new Message(ActionType.ERROR, null, errorMessage);
+
+        String json = JsonUtil.toJson(m);
+
+        FrameUtil.send(socket.getOutputStream(), json);
     }
 
     private Message waitForClientHello() throws IOException {

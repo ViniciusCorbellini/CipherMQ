@@ -72,6 +72,10 @@ public class ClientHandShake {
 
         Message m = JsonUtil.fromJson(messageJson, Message.class);
 
+        if (m.action() == ActionType.ERROR) {
+            throw new Exception(m.content());
+        }
+
         if (m.action() != ActionType.SERVER_HELLO) {
             throw new Exception("Error while waiting for SERVER_HELLO");
         }
