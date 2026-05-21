@@ -7,6 +7,7 @@ import com.manocorbas.ciphermq.client.ClientCredentials;
 import com.manocorbas.ciphermq.client.ClientSetup;
 import com.manocorbas.ciphermq.client.ConnectRequest;
 import com.manocorbas.ciphermq.exceptions.HandShakeException;
+import com.manocorbas.ciphermq.gui.Dashboard;
 import com.manocorbas.ciphermq.util.log.Log;
 
 // TODO: GUI (URGENT)
@@ -28,6 +29,10 @@ public class ClientCli {
             e.printStackTrace();
             running = false;
         }
+
+        Dashboard dashboard = new Dashboard();
+        dashboard.pack();
+        dashboard.setVisible(true);
 
         while (running) {
             try {
