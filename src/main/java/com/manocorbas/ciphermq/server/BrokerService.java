@@ -72,6 +72,7 @@ public class BrokerService {
         Set<String> subscribers = topicManager.getSubscribers(message.topic());
 
         Log.debug(COMPONENT, "Enqueueing message to " + subscribers.size() + " users (including publisher)");
+        message = new Message(message.action(), topic, message.content(), con.getClientId());
 
         for (String clientId : subscribers) {
             ClientSession session = clientRegistry.getOrCreate(clientId);

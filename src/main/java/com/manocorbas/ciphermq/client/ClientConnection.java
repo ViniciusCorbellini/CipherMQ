@@ -108,6 +108,7 @@ public class ClientConnection {
     private void printMessage(Message m) {
         System.out.println("======= Message =======");
         System.out.println("Topic: " + m.topic() + " | Action: " + m.action());
+        System.out.println("User: " + m.username());
         System.out.println("Content: ");
         System.out.println("-----------------------");
         System.out.println(m.content());
