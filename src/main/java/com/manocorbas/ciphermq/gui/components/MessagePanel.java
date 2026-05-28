@@ -1,20 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
- */
 package com.manocorbas.ciphermq.gui.components;
 
-/**
- *
- * @author Cliente
- */
 public class MessagePanel extends javax.swing.JPanel {
 
     /**
      * Creates new form MessagePanel
      */
-    public MessagePanel() {
+    public MessagePanel(String ownerUsername, String content) {
         initComponents();
+        buildMessage(ownerUsername, content);
     }
 
     /**
@@ -55,6 +48,10 @@ public class MessagePanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void buildMessage(String ownerUsername, String content) {
+        this.userLabel.setText("[User]: " + ownerUsername);
+        this.messageLabel.setText("[message]: " + content);
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel messageLabel;

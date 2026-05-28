@@ -30,7 +30,7 @@ public class ClientCli {
             running = false;
         }
 
-        Dashboard dashboard = new Dashboard();
+        Dashboard dashboard = new Dashboard(client);
         dashboard.pack();
         dashboard.setVisible(true);
 

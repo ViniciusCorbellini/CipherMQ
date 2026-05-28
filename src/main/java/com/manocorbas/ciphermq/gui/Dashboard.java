@@ -1,14 +1,48 @@
 package com.manocorbas.ciphermq.gui;
 
+import com.manocorbas.ciphermq.client.Client;
+import com.manocorbas.ciphermq.common.Message;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
 public class Dashboard extends javax.swing.JFrame {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Dashboard.class.getName());
+
+    private Client client;
+
+    // Mapa: topicName → lista de mensagens acumuladas
+    private final Map<String, List<String>> topicMessages = new LinkedHashMap<>();
+
+    // Model mutável para o JList (substitui o mock estático do initComponents)
+    private final DefaultListModel<String> topicsListModel = new DefaultListModel<>();
 
     /**
      * Creates new form Dashboard
      */
-    public Dashboard() {
+    public Dashboard(Client client) {
         initComponents();
+        this.client = client;
+
+        // substitui o model mock gerado pelo form editor
+        topicsList.setModel(topicsListModel);
+
+        // quando o usuário clica num tópico, renderiza as mensagens dele
+        topicsList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                renderSelectedTopic();
+            }
+        });
+
+        startMessageDispatcher();
     }
 
     /**
@@ -252,30 +286,85 @@ public class Dashboard extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-//    /**
-//     * @param args the command line arguments
-//     */
-//    public static void main(String args[]) {
-//        /* Set the Nimbus look and feel */
-//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-//         */
-//        try {
-//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-//                if ("Nimbus".equals(info.getName())) {
-//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-//                    break;
-//                }
-//            }
-//        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-//            logger.log(java.util.logging.Level.SEVERE, null, ex);
-//        }
-//        //</editor-fold>
-//
-//        /* Create and display the form */
-//        java.awt.EventQueue.invokeLater(() -> new Dashboard().setVisible(true));
-//    }
+    private void startMessageDispatcher() {
+        Thread dispatcher = new Thread(() -> {
+            while (true) {
+                try {
+                    Message msg = client.getMessageQueue().poll();
+                    if (msg != null) {
+                        // SwingUtilities garante que a atualização de UI
+                        // acontece na EDT (Event Dispatch Thread) do Swing
+                        SwingUtilities.invokeLater(() -> appendToTopic(msg));
+                    } else {
+                        Thread.sleep(100);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        });
+        dispatcher.setDaemon(true); // morre junto com a app
+        dispatcher.start();
+    }
+
+    /**
+     * Recebe uma mensagem e a armazena no tópico correto. Se o tópico ainda não
+     * existe na lista, adiciona. Se o tópico estiver selecionado no momento,
+     * re-renderiza.
+     */
+    private void appendToTopic(Message msg) {
+        String topic = msg.topic();
+
+        // garante que o tópico existe no mapa e na JList
+        if (!topicMessages.containsKey(topic)) {
+            topicMessages.put(topic, new ArrayList<>());
+            topicsListModel.addElement(topic);
+        }
+
+        // formata e acumula a mensagem
+        String formatted = "[" + msg.action() + "] " + msg.content();
+        topicMessages.get(topic).add(formatted);
+
+        // atualiza o painel só se esse tópico estiver visível agora
+        String selected = topicsList.getSelectedValue();
+        if (topic.equals(selected)) {
+            renderSelectedTopic();
+        }
+    }
+
+    /**
+     * Renderiza no messagesPanel as mensagens do tópico selecionado. Limpa o
+     * painel e reconstrói os painéis de mensagem.
+     */
+    private void renderSelectedTopic() {
+        String selected = topicsList.getSelectedValue();
+
+        // atualiza o label do header do topicPanel
+        topicLabel.setText(selected != null ? selected : "Topic");
+
+        messagesPanel.removeAll();
+        messagesPanel.setLayout(new BoxLayout(messagesPanel, BoxLayout.Y_AXIS));
+
+        if (selected != null && topicMessages.containsKey(selected)) {
+            for (String msg : topicMessages.get(selected)) {
+                // reutiliza o estilo do messagePanelmock: userLabel + messageLabel
+                JPanel card = new JPanel();
+                card.setLayout(new BoxLayout(card, javax.swing.BoxLayout.Y_AXIS));
+                card.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+
+                JLabel user = new JLabel("[ " + selected + " ]:");
+                JLabel content = new JLabel(msg);
+
+                card.add(user);
+                card.add(content);
+                messagesPanel.add(card);
+            }
+        }
+
+        messagesPanel.revalidate();
+        messagesPanel.repaint();
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel appNameLabel;

@@ -5,15 +5,18 @@ import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.exceptions.HandShakeException;
 import com.manocorbas.ciphermq.protocols.handshake.HandshakeResult;
 import com.manocorbas.ciphermq.util.log.Log;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Client {
     
     // Client
     private String username;
     private String sessionId;
+    private Queue<Message> messageQueue;
 
     // Net
-    private final ClientConnection connection = new ClientConnection();
+    private final ClientConnection connection = new ClientConnection(messageQueue);
 
     // log
     private final String COMPONENT = "CLIENT";
@@ -24,6 +27,7 @@ public class Client {
 
         this.username = result.clientName();
         this.sessionId = result.sessionId();
+        this.messageQueue = new ConcurrentLinkedQueue<>();
     }
 
     public void subscribe(String topic) {
@@ -73,4 +77,9 @@ public class Client {
     public void close() {
         connection.close();
     }
+
+    public Queue<Message> getMessageQueue() {
+        return messageQueue;
+    }
+    
 }
