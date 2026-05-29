@@ -3,6 +3,7 @@ package com.manocorbas.ciphermq.client;
 import java.io.IOException;
 import java.net.Socket;
 
+import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.exceptions.HandShakeException;
 import com.manocorbas.ciphermq.protocols.handshake.ClientHandShake;
@@ -40,15 +41,13 @@ public class ClientConnection {
 
             Log.info(COMPONENT, "Atempting to handshake");
             clientHandShake = new ClientHandShake(socket);
-            
+
             HandshakeResult result = clientHandShake.doHandshake(c.credentials().certificate());
 
             if (!result.success()) {
                 Log.info(COMPONENT, "Unsuccessful Handshake");
                 throw new HandShakeException("Unsuccessful Handshake");
             }
-            
-            startListening();
 
             return result;
 
@@ -58,7 +57,7 @@ public class ClientConnection {
         }
     }
 
-    private void startListening() {
+    public void startListening() {
 
         Log.info(COMPONENT, "Started to listen");
 
@@ -108,5 +107,18 @@ public class ClientConnection {
             socket.close();
         } catch (IOException ignored) {}
     }
-    
+
+    // ClientConnection.java
+    public Message waitForMessage(ActionType expected) throws IOException {
+        Message msg;
+        do {
+            msg = JsonUtil.fromJson(
+                    FrameUtil.receive(socket.getInputStream()), 
+                    Message.class
+            ); 
+
+        } while (msg.action() != expected);
+        return msg;
+    }
+
 }

@@ -9,6 +9,7 @@ public enum ActionType {
     UNSUBSCRIBE("unsub"),
     PUBLISH("pub"),
     CREATE_TOPIC("cr_top"),
+    GET_TOPICS("get_top"),
 
     // 3way register handshake 
     REGISTER("reg"),

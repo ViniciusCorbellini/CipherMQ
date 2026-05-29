@@ -2,11 +2,13 @@ package com.manocorbas.ciphermq.server;
 
 import java.util.Set;
 
+import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.exceptions.NonExistentTopicException;
 import com.manocorbas.ciphermq.exceptions.UnauthorizedAccessException;
 import com.manocorbas.ciphermq.server.registry.ClientRegistry;
 import com.manocorbas.ciphermq.server.registry.ClientSession;
+import com.manocorbas.ciphermq.util.JsonUtil;
 import com.manocorbas.ciphermq.util.log.Log;
 
 public class BrokerService {
@@ -23,7 +25,8 @@ public class BrokerService {
         this.clientRegistry = clientRegistry;
     }
 
-    public void handle(Message msg, ClientSession client) throws UnauthorizedAccessException, NonExistentTopicException  {
+    public void handle(Message msg, ClientSession client)
+            throws UnauthorizedAccessException, NonExistentTopicException {
 
         Log.debug(COMPONENT, "Handling message | action: " + msg.action());
 
@@ -45,6 +48,10 @@ public class BrokerService {
                 topicManager.createTopic(msg.topic(), client.getClientId());
             }
 
+            case GET_TOPICS -> {
+                sendTopics(client);
+            }
+
             default -> {
                 Log.debug(COMPONENT, "Unexpected value read");
                 throw new IllegalArgumentException("Unexpected value: " + msg.action());
@@ -57,31 +64,45 @@ public class BrokerService {
         session.detachConnection();
     }
 
-    private void publish(Message message, ClientSession con) throws UnauthorizedAccessException, NonExistentTopicException {
+    private void publish(Message message, ClientSession session)
+            throws UnauthorizedAccessException, NonExistentTopicException {
 
         String topic = message.topic();
 
-        if(!topicManager.topicExists(topic)){
+        if (!topicManager.topicExists(topic)) {
             throw new NonExistentTopicException(topic + " does not exist");
         }
 
-        if (!topicManager.topicContainsClient(topic, con.getClientId())) {
-            throw new UnauthorizedAccessException(con.getClientId() + " does not belong in topic: " + topic);
+        if (!topicManager.topicContainsClient(topic, session.getClientId())) {
+            throw new UnauthorizedAccessException(session.getClientId() + " does not belong in topic: " + topic);
         }
 
         Set<String> subscribers = topicManager.getSubscribers(message.topic());
 
         Log.debug(COMPONENT, "Enqueueing message to " + subscribers.size() + " users (including publisher)");
-        message = new Message(message.action(), topic, message.content(), con.getClientId());
+        message = new Message(message.action(), topic, message.content(), session.getClientId());
 
         for (String clientId : subscribers) {
-            ClientSession session = clientRegistry.getOrCreate(clientId);
+            ClientSession cs = clientRegistry.getOrCreate(clientId);
 
-            session.enqueue(message);
+            cs.enqueue(message);
 
-            if (session.isOnline()) {
-                session.flushQueue();
+            if (cs.isOnline()) {
+                cs.flushQueue();
             }
+        }
+    }
+
+    private void sendTopics(ClientSession client) {
+        Set<String> topics = topicManager.getTopicsByClient(client.getClientId());
+
+        String body = JsonUtil.toJson(topics);
+
+        Message m = new Message(ActionType.GET_TOPICS, null, body);
+
+        client.enqueue(m);
+        if (client.isOnline()) {
+            client.flushQueue();
         }
     }
 

@@ -2,32 +2,38 @@ package com.manocorbas.ciphermq.client;
 
 import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
-import com.manocorbas.ciphermq.exceptions.HandShakeException;
 import com.manocorbas.ciphermq.protocols.handshake.HandshakeResult;
+import com.manocorbas.ciphermq.util.JsonUtil;
 import com.manocorbas.ciphermq.util.log.Log;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Client {
-    
+
     // Client
     private String username;
     private String sessionId;
     private Queue<Message> messageQueue;
+    private Set<String> subscribedIn;
 
-    // Net
-    private final ClientConnection connection = new ClientConnection(messageQueue);
+    // net
+    private ClientConnection connection;
 
     // log
     private final String COMPONENT = "CLIENT";
 
-    public void connect(ConnectRequest c) throws HandShakeException {
-
+    public void connect(ConnectRequest c) throws Exception {
+        this.messageQueue = new ConcurrentLinkedQueue<>();
+        this.connection = new ClientConnection(messageQueue);
+        
         HandshakeResult result = connection.connect(c);
 
         this.username = result.clientName();
         this.sessionId = result.sessionId();
-        this.messageQueue = new ConcurrentLinkedQueue<>();
+
+        this.subscribedIn = fetchTopics();
+        this.connection.startListening();
     }
 
     public void subscribe(String topic) {
@@ -73,7 +79,19 @@ public class Client {
 
         connection.send(msg);
     }
-    
+
+    public Set<String> fetchTopics() throws Exception {
+        // envia GET_TOPICS ao broker
+        connection.send(new Message(ActionType.GET_TOPICS, null, null));
+
+        // aguarda a resposta diretamente (bloqueante, antes de iniciar o dispatcher)
+        Message response = connection.waitForMessage(ActionType.GET_TOPICS);
+
+        Set<String> topics = JsonUtil.fromJson(response.content(), Set.class);
+
+        return topics;
+    }
+
     public void close() {
         connection.close();
     }
@@ -81,5 +99,9 @@ public class Client {
     public Queue<Message> getMessageQueue() {
         return messageQueue;
     }
-    
+
+    public Set<String> getSubscribedIn() {
+        return subscribedIn;
+    }
+
 }
