@@ -1,5 +1,7 @@
 package com.manocorbas.ciphermq.cli;
 
+import com.manocorbas.ciphermq.util.log.Log;
+
 public class CliLauncher {
     public static void launch(String[] args) {
 
@@ -13,7 +15,7 @@ public class CliLauncher {
             }
 
         } catch (Exception e) {
-            System.out.println("Error " + e.getMessage());
+            Log.error("CLILAUNCHER", e.getMessage(), e);
             printHelp();
         }
     }

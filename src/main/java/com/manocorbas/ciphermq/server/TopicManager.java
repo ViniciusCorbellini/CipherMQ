@@ -1,5 +1,6 @@
 package com.manocorbas.ciphermq.server;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,12 +60,33 @@ public class TopicManager {
         subscribe(topic, clientId);
     }
 
-    public boolean topicExists(String topic){
+    public boolean topicExists(String topic) {
         return topics.get(topic) != null;
     }
 
     public boolean topicContainsClient(String topic, String clientId) {
         return topics.get(topic).contains(clientId);
+    }
+
+    // This is O(n), and is only acceptable because we have few topics and clients
+    // For this solution to be O(1), we could store a Map<String, Set<String>> clientsToTopics;
+    // However, it would be necessary to keep the other methods (unsub, sub, diconnect) consistent 
+    // with the approach 
+    public Set<String> getTopicsByClient(String clientId) {
+
+        Set<String> subscribedTopics = new HashSet<>();
+
+        for (Map.Entry<String, Set<String>> entry : topics.entrySet()) {
+
+            String topic = entry.getKey();
+            Set<String> subscribers = entry.getValue();
+
+            if (subscribers.contains(clientId)) {
+                subscribedTopics.add(topic);
+            }
+        }
+
+        return subscribedTopics;
     }
 
     private void printTopics() {

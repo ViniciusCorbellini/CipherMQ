@@ -78,7 +78,7 @@ public class ClientHandler implements Runnable, ClientConnection {
                 running = false;
 
             } catch (UnauthorizedAccessException e) {
-                Log.error(COMPONENT, "Client is not subscribed to this topic", e);
+                Log.warn(COMPONENT, "Client is not subscribed to this topic");
 
             } catch (NonExistentTopicException e) {
                 Log.error(COMPONENT, e.getMessage(), e);

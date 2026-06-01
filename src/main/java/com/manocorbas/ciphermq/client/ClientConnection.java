@@ -10,6 +10,7 @@ import com.manocorbas.ciphermq.protocols.handshake.HandshakeResult;
 import com.manocorbas.ciphermq.util.FrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
 import com.manocorbas.ciphermq.util.log.Log;
+import java.util.Queue;
 
 // Parte de rede do cliente
 public class ClientConnection {
@@ -23,8 +24,13 @@ public class ClientConnection {
     // threads
     private Thread listenThread;
     private volatile boolean running = true;
+    private Queue<Message> messageQueue;
 
     private String COMPONENT = "CLIENTCONNECTION";
+
+    public ClientConnection(Queue<Message> messageQueue) {
+        this.messageQueue = messageQueue;
+    }
 
     public HandshakeResult connect(ConnectRequest c) {
         try {
@@ -34,15 +40,13 @@ public class ClientConnection {
 
             Log.info(COMPONENT, "Atempting to handshake");
             clientHandShake = new ClientHandShake(socket);
-            
+
             HandshakeResult result = clientHandShake.doHandshake(c.credentials().certificate());
 
             if (!result.success()) {
                 Log.info(COMPONENT, "Unsuccessful Handshake");
                 throw new HandShakeException("Unsuccessful Handshake");
             }
-            
-            startListening();
 
             return result;
 
@@ -52,7 +56,7 @@ public class ClientConnection {
         }
     }
 
-    private void startListening() {
+    public void startListening() {
 
         Log.info(COMPONENT, "Started to listen");
 
@@ -65,7 +69,7 @@ public class ClientConnection {
 
                     Message msg = JsonUtil.fromJson(json, Message.class);
 
-                    printMessage(msg);
+                    messageQueue.add(msg);
                 }
 
             } catch (Exception e) {
@@ -82,13 +86,13 @@ public class ClientConnection {
 
     public void send(Message message) {
 
-        Log.info(COMPONENT, "Sending message: " + message.content());
+        Log.debug(COMPONENT, "Sending message: " + message.content());
 
         try {
             String json = JsonUtil.toJson(message);
             FrameUtil.send(socket.getOutputStream(), json);
         } catch (IOException e) {
-            Log.error(COMPONENT, "Error while sending message", e);
+            Log.warn(COMPONENT, "Error while sending message");
             e.printStackTrace();
         }
     }
@@ -100,19 +104,6 @@ public class ClientConnection {
         try {
             running = false;
             socket.close();
-        } catch (IOException ignored) {
-        }
-
+        } catch (IOException ignored) {}
     }
-
-    private void printMessage(Message m) {
-        System.out.println("======= Message =======");
-        System.out.println("Topic: " + m.topic() + " | Action: " + m.action());
-        System.out.println("Content: ");
-        System.out.println("-----------------------");
-        System.out.println(m.content());
-        System.out.println("-----------------------");
-        System.out.println("========= End =========");
-    }
-
 }
