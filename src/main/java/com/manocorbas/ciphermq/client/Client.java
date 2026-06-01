@@ -5,6 +5,7 @@ import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.protocols.handshake.HandshakeResult;
 import com.manocorbas.ciphermq.util.JsonUtil;
 import com.manocorbas.ciphermq.util.log.Log;
+import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -15,7 +16,7 @@ public class Client {
     private String username;
     private String sessionId;
     private Queue<Message> messageQueue;
-    private Set<String> subscribedIn;
+    private Set<String> subscribedIn = new HashSet<>();
 
     // net
     private ClientConnection connection;
@@ -26,14 +27,14 @@ public class Client {
     public void connect(ConnectRequest c) throws Exception {
         this.messageQueue = new ConcurrentLinkedQueue<>();
         this.connection = new ClientConnection(messageQueue);
-        
+
         HandshakeResult result = connection.connect(c);
 
         this.username = result.clientName();
         this.sessionId = result.sessionId();
 
-        this.subscribedIn = fetchTopics();
         this.connection.startListening();
+        fetchTopics();
     }
 
     public void subscribe(String topic) {
@@ -80,16 +81,35 @@ public class Client {
         connection.send(msg);
     }
 
-    public Set<String> fetchTopics() throws Exception {
-        // envia GET_TOPICS ao broker
+    public void fetchTopics() throws Exception {
+        Log.info(COMPONENT, "Fetching topics");
+
         connection.send(new Message(ActionType.GET_TOPICS, null, null));
 
-        // aguarda a resposta diretamente (bloqueante, antes de iniciar o dispatcher)
-        Message response = connection.waitForMessage(ActionType.GET_TOPICS);
+        // polling in the messageQueue instead of trying to read directly from the
+        // socket
+        long deadline = System.currentTimeMillis() + 5000; // timeout 5s
 
-        Set<String> topics = JsonUtil.fromJson(response.content(), Set.class);
+        while (System.currentTimeMillis() < deadline) {
+            Message msg = messageQueue.poll();
 
-        return topics;
+            if (msg == null) {
+                Thread.sleep(50);
+                continue;
+            }
+
+            // If we get a GET_TOPICS message, we update the subscribedIn set
+            if (msg.action() == ActionType.GET_TOPICS) {
+                Log.info(COMPONENT, "Topic list received");
+                this.subscribedIn = JsonUtil.fromJson(msg.content(), HashSet.class);
+                return;
+            }
+
+            // else, we enqueue it back so the dispatcher can proccess it
+            messageQueue.add(msg);
+        }
+
+        throw new Exception("Timeout waiting for GET_TOPICS response");
     }
 
     public void close() {
@@ -104,4 +124,7 @@ public class Client {
         return subscribedIn;
     }
 
+    public String getUsername() {
+        return username;
+    }
 }

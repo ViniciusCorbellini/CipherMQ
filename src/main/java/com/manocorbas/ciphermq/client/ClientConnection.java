@@ -3,7 +3,6 @@ package com.manocorbas.ciphermq.client;
 import java.io.IOException;
 import java.net.Socket;
 
-import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.exceptions.HandShakeException;
 import com.manocorbas.ciphermq.protocols.handshake.ClientHandShake;
@@ -87,13 +86,13 @@ public class ClientConnection {
 
     public void send(Message message) {
 
-        Log.info(COMPONENT, "Sending message: " + message.content());
+        Log.debug(COMPONENT, "Sending message: " + message.content());
 
         try {
             String json = JsonUtil.toJson(message);
             FrameUtil.send(socket.getOutputStream(), json);
         } catch (IOException e) {
-            Log.error(COMPONENT, "Error while sending message", e);
+            Log.warn(COMPONENT, "Error while sending message");
             e.printStackTrace();
         }
     }
@@ -107,18 +106,4 @@ public class ClientConnection {
             socket.close();
         } catch (IOException ignored) {}
     }
-
-    // ClientConnection.java
-    public Message waitForMessage(ActionType expected) throws IOException {
-        Message msg;
-        do {
-            msg = JsonUtil.fromJson(
-                    FrameUtil.receive(socket.getInputStream()), 
-                    Message.class
-            ); 
-
-        } while (msg.action() != expected);
-        return msg;
-    }
-
 }

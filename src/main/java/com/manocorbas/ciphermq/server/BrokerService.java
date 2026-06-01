@@ -14,7 +14,6 @@ import com.manocorbas.ciphermq.util.log.Log;
 public class BrokerService {
 
     // TODO: LOG
-
     private final TopicManager topicManager;
     private final ClientRegistry clientRegistry;
 

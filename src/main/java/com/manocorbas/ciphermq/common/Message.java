@@ -4,7 +4,7 @@ public record Message(
     ActionType action,
     String topic,
     String content,
-    String username
+    String sender
 ) {
 
     public Message(ActionType action, String topic, String content) {
