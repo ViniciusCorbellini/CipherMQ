@@ -479,7 +479,7 @@ public class Dashboard extends javax.swing.JFrame {
             for (Message msg : topicMessages.get(selected)) {
                 String sender = msg.sender() != null ? msg.sender() : "unknown";
 
-                MessagePanel card = new MessagePanel(sender, msg.content());
+                MessagePanel card = new MessagePanel(msg.time(), sender, msg.content());
                 messagesPanel.add(card);
             }
         }
