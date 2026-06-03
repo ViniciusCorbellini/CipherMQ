@@ -25,10 +25,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="userLabel" pref="436" max="32767" attributes="0"/>
-                  <Component id="messageLabel" alignment="0" pref="436" max="32767" attributes="0"/>
-              </Group>
+              <Component id="userLabel" pref="436" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -38,9 +35,7 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Component id="userLabel" min="-2" pref="16" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="messageLabel" min="-2" max="-2" attributes="0"/>
-              <EmptySpace pref="14" max="32767" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -48,12 +43,7 @@
   <SubComponents>
     <Component class="javax.swing.JLabel" name="userLabel">
       <Properties>
-        <Property name="text" type="java.lang.String" value="[ User ] :"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="messageLabel">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="[ Message ] :"/>
+        <Property name="text" type="java.lang.String" value="[time][user]:&lt;message&gt;"/>
       </Properties>
     </Component>
   </SubComponents>

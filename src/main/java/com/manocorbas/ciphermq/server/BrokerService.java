@@ -1,5 +1,6 @@
 package com.manocorbas.ciphermq.server;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import com.manocorbas.ciphermq.common.ActionType;
@@ -79,7 +80,7 @@ public class BrokerService {
         Set<String> subscribers = topicManager.getSubscribers(message.topic());
 
         Log.debug(COMPONENT, "Enqueueing message to " + subscribers.size() + " users (including publisher)");
-        message = new Message(message.action(), topic, message.content(), session.getClientId());
+        message = new Message(message.action(), topic, message.content(), session.getClientId(), LocalDateTime.now());
 
         for (String clientId : subscribers) {
             ClientSession cs = clientRegistry.getOrCreate(clientId);
