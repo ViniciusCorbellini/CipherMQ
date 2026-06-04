@@ -27,7 +27,7 @@ public class Server {
         try {
             acPair = CaSetup.initAC();
         } catch (Exception e) {
-            Log.error(COMPONENT, "Instantiating CA", e);
+            Log.error(COMPONENT, "Error while instantiating CA", e);
         } 
         PublicKey acPublicKey = acPair.getPublic();
 

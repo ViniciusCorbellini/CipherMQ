@@ -57,17 +57,15 @@ public class ClientHandler implements Runnable, ClientConnection {
             out = clientSocket.getOutputStream();
 
             session = doHandShakeAndRegistry();
-            Log.debug(COMPONENT, "Session online: " + session.isOnline());
 
         } catch (IOException | HandShakeException e) {
             Log.error(COMPONENT, e.getMessage(), e);
             running = false;
         }
 
+        Log.info(COMPONENT, "Listening");
         while (running) {
             try {
-                Log.info(COMPONENT, "Waiting for message");
-
                 String json = FrameUtil.receive(in);
 
                 Message msg = JsonUtil.fromJson(json, Message.class);
@@ -84,7 +82,7 @@ public class ClientHandler implements Runnable, ClientConnection {
                 Log.error(COMPONENT, e.getMessage(), e);
 
             } catch (Exception e) {
-                Log.error(COMPONENT, "Unexpected error while handling client", e);
+                Log.warn(COMPONENT, "Unexpected error while handling client");
                 running = false;
             }
         }

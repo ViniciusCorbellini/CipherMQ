@@ -34,9 +34,8 @@ public class ClientConnection {
 
     public HandshakeResult connect(ConnectRequest c) {
         try {
-            Log.info(COMPONENT, "Atempting to connect to broker");
             socket = new Socket(c.host(), c.port());
-            Log.info(COMPONENT, "Client connected: " + socket.getRemoteSocketAddress());
+            Log.info(COMPONENT, "Client connected to broker: " + socket.getRemoteSocketAddress());
 
             Log.info(COMPONENT, "Atempting to handshake");
             clientHandShake = new ClientHandShake(socket);
@@ -44,7 +43,7 @@ public class ClientConnection {
             HandshakeResult result = clientHandShake.doHandshake(c.credentials().certificate());
 
             if (!result.success()) {
-                Log.info(COMPONENT, "Unsuccessful Handshake");
+                Log.warn(COMPONENT, "Unsuccessful Handshake");
                 throw new HandShakeException("Unsuccessful Handshake");
             }
 
@@ -64,7 +63,6 @@ public class ClientConnection {
             try {
 
                 while (running) {
-                    Log.debug(COMPONENT, "Listening for any messages");
                     String json = FrameUtil.receive(socket.getInputStream());
 
                     Message msg = JsonUtil.fromJson(json, Message.class);
@@ -86,7 +84,7 @@ public class ClientConnection {
 
     public void send(Message message) {
 
-        Log.debug(COMPONENT, "Sending message: " + message.content());
+        // Log.debug(COMPONENT, "Sending message: " + message.content());
 
         try {
             String json = JsonUtil.toJson(message);

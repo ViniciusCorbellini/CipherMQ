@@ -3,6 +3,7 @@ package com.manocorbas.ciphermq.server.registry;
 import java.security.SecureRandom;
 import java.util.Base64;
 
+// unnecessary for now! 
 public class SessionIdGenerator {
 
     private static final SecureRandom secureRandom = new SecureRandom();
