@@ -100,7 +100,6 @@ public class Client {
 
             // If we get a GET_TOPICS message, we update the subscribedIn set
             if (msg.action() == ActionType.GET_TOPICS) {
-                Log.info(COMPONENT, "Topic list received");
                 this.subscribedIn = JsonUtil.fromJson(msg.content(), HashSet.class);
                 return;
             }

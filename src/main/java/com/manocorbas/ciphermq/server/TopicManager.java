@@ -8,10 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.manocorbas.ciphermq.util.log.Log;
 
 /**
- * Nota sobre a mudança: Agora a reponsabilidade de publicar mensagens não
- * pertence mais ao TM,
- * ela é do broker service e da sessão do cliente. O TM apenas gerencia os
- * usuários de um tópico
+ * Manages topics and its users
  */
 public class TopicManager {
 
@@ -20,6 +17,13 @@ public class TopicManager {
     private Map<String, Set<String>> topics = new ConcurrentHashMap<>();
 
     private String COMPONENT = "TOPICMANAGER";
+
+    public void createTopic(String topic, String clientId) {
+        Log.info(COMPONENT, "Creating topic: " + topic);
+        topics.computeIfAbsent(topic, t -> ConcurrentHashMap.newKeySet()).add(clientId);
+
+        subscribe(topic, clientId);
+    }
 
     public void subscribe(String topic, String clientId) {
         Log.info(COMPONENT, "Subscribing client in topic: " + topic);
@@ -49,29 +53,6 @@ public class TopicManager {
         }
     }
 
-    public Set<String> getSubscribers(String topic) {
-        return topics.getOrDefault(topic, Set.of());
-    }
-
-    public void createTopic(String topic, String clientId) {
-        Log.info(COMPONENT, "Creating topic: " + topic);
-        topics.computeIfAbsent(topic, t -> ConcurrentHashMap.newKeySet()).add(clientId);
-
-        subscribe(topic, clientId);
-    }
-
-    public boolean topicExists(String topic) {
-        return topics.get(topic) != null;
-    }
-
-    public boolean topicContainsClient(String topic, String clientId) {
-        return topics.get(topic).contains(clientId);
-    }
-
-    // This is O(n), and is only acceptable because we have few topics and clients
-    // For this solution to be O(1), we could store a Map<String, Set<String>> clientsToTopics;
-    // However, it would be necessary to keep the other methods (unsub, sub, diconnect) consistent 
-    // with the approach 
     public Set<String> getTopicsByClient(String clientId) {
 
         Set<String> subscribedTopics = new HashSet<>();
@@ -89,6 +70,18 @@ public class TopicManager {
         return subscribedTopics;
     }
 
+    public Set<String> getSubscribers(String topic) {
+        return topics.getOrDefault(topic, Set.of());
+    }
+
+    public boolean topicExists(String topic) {
+        return topics.get(topic) != null;
+    }
+
+    public boolean topicContainsClient(String topic, String clientId) {
+        return topics.get(topic).contains(clientId);
+    }
+
     private void printTopics() {
         for (Map.Entry<String, Set<String>> entry : topics.entrySet()) {
             Set<String> list = entry.getValue();
@@ -98,4 +91,5 @@ public class TopicManager {
             System.out.println("==============");
         }
     }
+
 }

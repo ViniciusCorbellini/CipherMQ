@@ -1,6 +1,9 @@
 package com.manocorbas.ciphermq.gui;
 
 import com.manocorbas.ciphermq.client.Client;
+import com.manocorbas.ciphermq.client.ClientCredentials;
+import com.manocorbas.ciphermq.client.ClientSetup;
+import com.manocorbas.ciphermq.client.ConnectRequest;
 import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.gui.components.MessagePanel;
@@ -18,6 +21,10 @@ import javax.swing.SwingUtilities;
 public class Dashboard extends javax.swing.JFrame {
 
     private Client client;
+    private boolean isLoggedIn = false;
+
+    private String host;
+    private int port;
 
     // Mapa: topicName → lista de mensagens acumuladas
     private final Map<String, List<Message>> topicMessages = new LinkedHashMap<>();
@@ -28,26 +35,14 @@ public class Dashboard extends javax.swing.JFrame {
     /**
      * Creates new form Dashboard
      */
-    public Dashboard(Client client) {
+    public Dashboard(String host, int port) {
+        this.port = port;
+        this.host = host;
+
         initComponents();
-        this.client = client;
-        this.usernameLabel.setText(client.getUsername());
 
         topicsList.setModel(topicsListModel);
 
-        // popula os tópicos que já existem antes de abrir
-        for (String topic : client.getSubscribedIn()) {
-            topicMessages.put(topic, new java.util.ArrayList<>());
-            topicsListModel.addElement(topic);
-        }
-
-        topicsList.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                renderSelectedTopic();
-            }
-        });
-
-        startMessageDispatcher();
         this.pack();
 
         Log.info("GUI", "GUI started");
@@ -62,12 +57,15 @@ public class Dashboard extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated
     // <editor-fold defaultstate="collapsed" desc="Generated
     // <editor-fold defaultstate="collapsed" desc="Generated
+    // <editor-fold defaultstate="collapsed" desc="Generated
     // Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         headerPanel = new javax.swing.JPanel();
         appNameLabel = new javax.swing.JLabel();
-        usernameLabel = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        usernameTextArea = new javax.swing.JTextArea();
+        loginButton = new javax.swing.JButton();
         navbarPanel = new javax.swing.JPanel();
         topicsLabel = new javax.swing.JLabel();
         topicsScrollPane = new javax.swing.JScrollPane();
@@ -91,6 +89,13 @@ public class Dashboard extends javax.swing.JFrame {
 
         appNameLabel.setText("CipherMQ!");
 
+        usernameTextArea.setColumns(20);
+        usernameTextArea.setRows(5);
+        jScrollPane3.setViewportView(usernameTextArea);
+
+        loginButton.setText("login");
+        loginButton.addActionListener(this::loginButtonActionPerformed);
+
         javax.swing.GroupLayout headerPanelLayout = new javax.swing.GroupLayout(headerPanel);
         headerPanel.setLayout(headerPanelLayout);
         headerPanelLayout.setHorizontalGroup(
@@ -101,18 +106,28 @@ public class Dashboard extends javax.swing.JFrame {
                                         javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
                                         javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(usernameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 198,
+                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(loginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 92,
                                         javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap()));
         headerPanelLayout.setVerticalGroup(
                 headerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(headerPanelLayout.createSequentialGroup()
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, headerPanelLayout.createSequentialGroup()
                                 .addContainerGap()
                                 .addGroup(headerPanelLayout
-                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(appNameLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 62,
-                                                Short.MAX_VALUE)
-                                        .addComponent(usernameLabel))
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(loginButton, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(appNameLabel, javax.swing.GroupLayout.Alignment.LEADING,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, headerPanelLayout
+                                                .createSequentialGroup()
+                                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 45,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(0, 0, Short.MAX_VALUE)))
                                 .addContainerGap()));
 
         topicsLabel.setText("Topics");
@@ -135,9 +150,11 @@ public class Dashboard extends javax.swing.JFrame {
         jScrollPane2.setViewportView(topicInteractionTextArea);
 
         createButton.setText("create");
+        createButton.setEnabled(false);
         createButton.addActionListener(this::createButtonActionPerformed);
 
         subButton.setText("sub");
+        subButton.setEnabled(false);
         subButton.addActionListener(this::subButtonActionPerformed);
 
         javax.swing.GroupLayout navbarPanelLayout = new javax.swing.GroupLayout(navbarPanel);
@@ -209,6 +226,7 @@ public class Dashboard extends javax.swing.JFrame {
         jScrollPane1.setViewportView(messageTextArea);
 
         sendButton.setText("Send");
+        sendButton.setEnabled(false);
         sendButton.addActionListener(this::sendButtonActionPerformed);
 
         javax.swing.GroupLayout bottomBarPanelLayout = new javax.swing.GroupLayout(bottomBarPanel);
@@ -232,6 +250,7 @@ public class Dashboard extends javax.swing.JFrame {
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 
         unsubButton.setText("unsub");
+        unsubButton.setEnabled(false);
         unsubButton.addActionListener(this::unsubButtonActionPerformed);
 
         javax.swing.GroupLayout topicPanelLayout = new javax.swing.GroupLayout(topicPanel);
@@ -294,7 +313,7 @@ public class Dashboard extends javax.swing.JFrame {
                                 .addContainerGap()
                                 .addComponent(headerPanel, javax.swing.GroupLayout.PREFERRED_SIZE,
                                         javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
+                                .addGap(76, 76, 76)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addComponent(navbarPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
                                                 javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -304,6 +323,58 @@ public class Dashboard extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_loginButtonActionPerformed
+        Log.debug("GUI", "Initializing client");
+
+        String username = getStringAndValidateFrom(usernameTextArea);
+
+        if (username == null) {
+            return;
+        }
+
+        ClientCredentials creds = null;
+        try {
+            creds = ClientSetup.load(username);
+        } catch (Exception e) {
+            Log.error("GUI", "Error while loading credential", e);
+            return;
+        }
+
+        Client client = new Client();
+
+        ConnectRequest request = new ConnectRequest(this.host, this.port, creds);
+
+        try {
+            client.connect(request);
+        } catch (Exception e) {
+            Log.error("GUI", "Error while connecting to broker", e);
+            return;
+        }
+
+        this.client = client;
+        this.isLoggedIn = true;
+
+        this.loginButton.setEnabled(!isLoggedIn);
+        this.createButton.setEnabled(isLoggedIn);
+        this.subButton.setEnabled(isLoggedIn);
+        this.sendButton.setEnabled(isLoggedIn);
+        this.unsubButton.setEnabled(isLoggedIn);
+
+        // popula os tópicos que já existem antes de abrir
+        for (String topic : client.getSubscribedIn()) {
+            topicMessages.put(topic, new java.util.ArrayList<>());
+            topicsListModel.addElement(topic);
+        }
+
+        topicsList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                renderSelectedTopic();
+            }
+        });
+
+        startMessageDispatcher();
+    }// GEN-LAST:event_loginButtonActionPerformed
 
     private void createButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_createButtonActionPerformed
         String topic = getStringAndValidateFrom(topicInteractionTextArea);
@@ -343,6 +414,9 @@ public class Dashboard extends javax.swing.JFrame {
 
     private void unsubButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_unsubButtonActionPerformed
         String selected = topicsList.getSelectedValue();
+
+        if (selected == null)
+            return;
 
         client.unsubscribe(selected);
 
@@ -409,7 +483,7 @@ public class Dashboard extends javax.swing.JFrame {
             while (true) {
                 try {
                     Message msg = client.getMessageQueue().poll();
-                    
+
                     if (msg == null) {
                         Thread.sleep(100);
                         continue;
@@ -443,8 +517,9 @@ public class Dashboard extends javax.swing.JFrame {
     private void appendToTopic(Message msg) {
         String topic = msg.topic();
 
-        if (topic == null)
+        if (topic == null) {
             return;
+        }
 
         // garante que o tópico existe no mapa e na JList
         if (!topicMessages.containsKey(topic)) {
@@ -495,6 +570,8 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel headerPanel;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JButton loginButton;
     private javax.swing.JTextArea messageTextArea;
     private javax.swing.JPanel messagesPanel;
     private javax.swing.JScrollPane messagesScrollPane;
@@ -509,6 +586,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JList<String> topicsList;
     private javax.swing.JScrollPane topicsScrollPane;
     private javax.swing.JButton unsubButton;
-    private javax.swing.JLabel usernameLabel;
+    private javax.swing.JTextArea usernameTextArea;
     // End of variables declaration//GEN-END:variables
 }

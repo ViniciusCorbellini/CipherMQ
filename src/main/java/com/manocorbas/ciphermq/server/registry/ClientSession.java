@@ -16,7 +16,6 @@ public class ClientSession {
     private volatile ClientConnection connection;
     private Status status;
     private String sessionId;
-    // private long expiresAt; TODO
 
     public ClientSession(String clientId) {
         this.clientId = clientId;
