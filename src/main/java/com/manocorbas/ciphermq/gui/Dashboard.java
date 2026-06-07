@@ -58,14 +58,13 @@ public class Dashboard extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated
     // <editor-fold defaultstate="collapsed" desc="Generated
     // <editor-fold defaultstate="collapsed" desc="Generated
-    // Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         headerPanel = new javax.swing.JPanel();
         appNameLabel = new javax.swing.JLabel();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        usernameTextArea = new javax.swing.JTextArea();
         loginButton = new javax.swing.JButton();
+        usernameTextField = new javax.swing.JTextField();
         navbarPanel = new javax.swing.JPanel();
         topicsLabel = new javax.swing.JLabel();
         topicsScrollPane = new javax.swing.JScrollPane();
@@ -89,59 +88,40 @@ public class Dashboard extends javax.swing.JFrame {
 
         appNameLabel.setText("CipherMQ!");
 
-        usernameTextArea.setColumns(20);
-        usernameTextArea.setRows(5);
-        jScrollPane3.setViewportView(usernameTextArea);
-
         loginButton.setText("login");
         loginButton.addActionListener(this::loginButtonActionPerformed);
 
         javax.swing.GroupLayout headerPanelLayout = new javax.swing.GroupLayout(headerPanel);
         headerPanel.setLayout(headerPanelLayout);
         headerPanelLayout.setHorizontalGroup(
-                headerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(headerPanelLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(appNameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 118,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
-                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                        javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(loginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 92,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap()));
+            headerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(headerPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(appNameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(usernameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(loginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
         headerPanelLayout.setVerticalGroup(
-                headerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, headerPanelLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(headerPanelLayout
-                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                        .addComponent(loginButton, javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(appNameLabel, javax.swing.GroupLayout.Alignment.LEADING,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, headerPanelLayout
-                                                .createSequentialGroup()
-                                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 45,
-                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(0, 0, Short.MAX_VALUE)))
-                                .addContainerGap()));
+            headerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, headerPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(headerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(headerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(loginButton, javax.swing.GroupLayout.DEFAULT_SIZE, 45, Short.MAX_VALUE)
+                        .addComponent(usernameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(appNameLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
 
         topicsLabel.setText("Topics");
 
         topicsList.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-
-            public int getSize() {
-                return strings.length;
-            }
-
-            public String getElementAt(int i) {
-                return strings[i];
-            }
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
         });
         topicsScrollPane.setViewportView(topicsList);
 
@@ -160,51 +140,36 @@ public class Dashboard extends javax.swing.JFrame {
         javax.swing.GroupLayout navbarPanelLayout = new javax.swing.GroupLayout(navbarPanel);
         navbarPanel.setLayout(navbarPanelLayout);
         navbarPanelLayout.setHorizontalGroup(
-                navbarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(navbarPanelLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(navbarPanelLayout
-                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(topicsScrollPane, javax.swing.GroupLayout.Alignment.TRAILING,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE, 333, Short.MAX_VALUE)
-                                        .addComponent(topicsLabel, javax.swing.GroupLayout.Alignment.TRAILING,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addGroup(navbarPanelLayout.createSequentialGroup()
-                                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addGroup(navbarPanelLayout
-                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addComponent(createButton,
-                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                        .addComponent(subButton, javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                                Short.MAX_VALUE))))
-                                .addContainerGap()));
+            navbarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(navbarPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(navbarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(topicsScrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 333, Short.MAX_VALUE)
+                    .addComponent(topicsLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(navbarPanelLayout.createSequentialGroup()
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(navbarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(createButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(subButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addContainerGap())
+        );
         navbarPanelLayout.setVerticalGroup(
-                navbarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(navbarPanelLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(topicsLabel)
-                                .addGap(18, 18, 18)
-                                .addComponent(topicsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 317,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addGroup(navbarPanelLayout
-                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGroup(navbarPanelLayout.createSequentialGroup()
-                                                .addComponent(createButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38,
-                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(subButton, javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+            navbarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(navbarPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(topicsLabel)
+                .addGap(18, 18, 18)
+                .addComponent(topicsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 317, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(navbarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(navbarPanelLayout.createSequentialGroup()
+                        .addComponent(createButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(subButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         topicLabel.setText("Topic");
 
@@ -213,11 +178,13 @@ public class Dashboard extends javax.swing.JFrame {
         javax.swing.GroupLayout messagesPanelLayout = new javax.swing.GroupLayout(messagesPanel);
         messagesPanel.setLayout(messagesPanelLayout);
         messagesPanelLayout.setHorizontalGroup(
-                messagesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 424, Short.MAX_VALUE));
+            messagesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 424, Short.MAX_VALUE)
+        );
         messagesPanelLayout.setVerticalGroup(
-                messagesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 326, Short.MAX_VALUE));
+            messagesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 326, Short.MAX_VALUE)
+        );
 
         messagesScrollPane.setViewportView(messagesPanel);
 
@@ -232,22 +199,21 @@ public class Dashboard extends javax.swing.JFrame {
         javax.swing.GroupLayout bottomBarPanelLayout = new javax.swing.GroupLayout(bottomBarPanel);
         bottomBarPanel.setLayout(bottomBarPanelLayout);
         bottomBarPanelLayout.setHorizontalGroup(
-                bottomBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(bottomBarPanelLayout.createSequentialGroup()
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 329,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(sendButton, javax.swing.GroupLayout.DEFAULT_SIZE, 78, Short.MAX_VALUE)));
+            bottomBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(bottomBarPanelLayout.createSequentialGroup()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 329, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(sendButton, javax.swing.GroupLayout.DEFAULT_SIZE, 78, Short.MAX_VALUE))
+        );
         bottomBarPanelLayout.setVerticalGroup(
-                bottomBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(bottomBarPanelLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(bottomBarPanelLayout
-                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                        .addComponent(jScrollPane1)
-                                        .addComponent(sendButton, javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+            bottomBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(bottomBarPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(bottomBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane1)
+                    .addComponent(sendButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         unsubButton.setText("unsub");
         unsubButton.setEnabled(false);
@@ -256,70 +222,60 @@ public class Dashboard extends javax.swing.JFrame {
         javax.swing.GroupLayout topicPanelLayout = new javax.swing.GroupLayout(topicPanel);
         topicPanel.setLayout(topicPanelLayout);
         topicPanelLayout.setHorizontalGroup(
-                topicPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(topicPanelLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(topicPanelLayout
-                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(messagesScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0,
-                                                Short.MAX_VALUE)
-                                        .addGroup(topicPanelLayout.createSequentialGroup()
-                                                .addComponent(topicLabel)
-                                                .addGap(18, 18, 18)
-                                                .addComponent(topicInfoLabel)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
-                                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(unsubButton))
-                                        .addComponent(bottomBarPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addContainerGap()));
+            topicPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(topicPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(topicPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(messagesScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(topicPanelLayout.createSequentialGroup()
+                        .addComponent(topicLabel)
+                        .addGap(18, 18, 18)
+                        .addComponent(topicInfoLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(unsubButton))
+                    .addComponent(bottomBarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
         topicPanelLayout.setVerticalGroup(
-                topicPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(topicPanelLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(
-                                        topicPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                                .addComponent(topicLabel)
-                                                .addComponent(topicInfoLabel)
-                                                .addComponent(unsubButton))
-                                .addGap(18, 18, 18)
-                                .addComponent(messagesScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 311,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(bottomBarPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
-                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addContainerGap()));
+            topicPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(topicPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(topicPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(topicLabel)
+                    .addComponent(topicInfoLabel)
+                    .addComponent(unsubButton))
+                .addGap(18, 18, 18)
+                .addComponent(messagesScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(bottomBarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addComponent(navbarPanel, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(18, 18, 18)
-                                                .addComponent(topicPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                        .addComponent(headerPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addContainerGap()));
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(navbarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(topicPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(headerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
         layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(headerPanel, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                        javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(76, 76, 76)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(navbarPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(topicPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addContainerGap()));
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(headerPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(76, 76, 76)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(navbarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(topicPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -327,7 +283,7 @@ public class Dashboard extends javax.swing.JFrame {
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_loginButtonActionPerformed
         Log.debug("GUI", "Initializing client");
 
-        String username = getStringAndValidateFrom(usernameTextArea);
+        String username = getStringAndValidateFrom(usernameTextField);
 
         if (username == null) {
             return;
@@ -360,6 +316,8 @@ public class Dashboard extends javax.swing.JFrame {
         this.subButton.setEnabled(isLoggedIn);
         this.sendButton.setEnabled(isLoggedIn);
         this.unsubButton.setEnabled(isLoggedIn);
+        this.usernameTextField.setEditable(!isLoggedIn);
+        this.usernameTextField.setText(username);
 
         // popula os tópicos que já existem antes de abrir
         for (String topic : client.getSubscribedIn()) {
@@ -440,12 +398,12 @@ public class Dashboard extends javax.swing.JFrame {
         client.publish(topic, messageContent);
     }// GEN-LAST:event_sendButtonActionPerformed
 
-    private String getStringAndValidateFrom(javax.swing.JTextArea textArea) {
-        String text = textArea.getText();
+    private String getStringAndValidateFrom(javax.swing.text.JTextComponent textComponent) {
+        String text = textComponent.getText();
 
         text = text.strip();
 
-        textArea.setText("");
+        textComponent.setText("");
         return text.isBlank() ? null : text;
     }
 
@@ -456,12 +414,9 @@ public class Dashboard extends javax.swing.JFrame {
         // Cleans for rebuild
         topicsListModel.clear();
 
-        System.out.println("Topics -> ");
-
         // rebuilds based on SubscribedIn()
         for (String t : client.getSubscribedIn()) {
             // mantém mensagens já acumuladas, só adiciona ao model visual
-            System.out.println("Topic: " + t);
             topicMessages.putIfAbsent(t, new ArrayList<>());
             topicsListModel.addElement(t);
         }
@@ -570,7 +525,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel headerPanel;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JButton loginButton;
     private javax.swing.JTextArea messageTextArea;
     private javax.swing.JPanel messagesPanel;
@@ -586,6 +540,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JList<String> topicsList;
     private javax.swing.JScrollPane topicsScrollPane;
     private javax.swing.JButton unsubButton;
-    private javax.swing.JTextArea usernameTextArea;
+    private javax.swing.JTextField usernameTextField;
     // End of variables declaration//GEN-END:variables
 }
