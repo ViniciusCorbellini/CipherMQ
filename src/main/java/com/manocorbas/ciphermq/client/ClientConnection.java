@@ -40,7 +40,7 @@ public class ClientConnection {
             Log.info(COMPONENT, "Atempting to handshake");
             clientHandShake = new ClientHandShake(socket);
 
-            HandshakeResult result = clientHandShake.doHandshake(c.credentials().certificate());
+            HandshakeResult result = clientHandShake.doHandshake(c.credentials());
 
             if (!result.success()) {
                 Log.warn(COMPONENT, "Unsuccessful Handshake");

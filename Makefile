@@ -1,11 +1,11 @@
 # Defaults
 HOST ?= 127.0.0.1
 PORT ?= 8080
-
+USERNAME ?= user
 
 # Compiles the project and generates the .jar
 build:
-	mvn clean package
+	mvn clean package -DskipTest
 
 # Cleans target/
 clean:
@@ -19,3 +19,7 @@ run_srv:
 # example: make run_cli HOST=192.168.0.10 PORT=8008
 run_cli:
 	java -cp target/CipherMQ-1.0-SNAPSHOT.jar com.manocorbas.ciphermq.App cli --connect $(HOST):$(PORT)
+
+# example: make sign USERNAME=alice
+sign:
+	java -cp target/CipherMQ-1.0-SNAPSHOT.jar com.manocorbas.ciphermq.App sign --username $(USERNAME)

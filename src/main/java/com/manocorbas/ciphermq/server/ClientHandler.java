@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.security.PublicKey;
+import java.security.PrivateKey;
 
 import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.exceptions.HandShakeException;
@@ -34,6 +35,7 @@ public class ClientHandler implements Runnable, ClientConnection {
     // protocols
     private ServerHandShake serverHandShake;
     private PublicKey pubKey;
+    private PrivateKey privKey;
 
     // thread
     private volatile boolean running = true;
@@ -92,7 +94,7 @@ public class ClientHandler implements Runnable, ClientConnection {
 
     private ClientSession doHandShakeAndRegistry() throws IOException, HandShakeException {
         Log.info(COMPONENT, "Handshaking");
-        HandshakeResult result = serverHandShake.doHandshake(pubKey);
+        HandshakeResult result = serverHandShake.doHandshake(pubKey, privKey);
 
         if (!result.success())
             throw new HandShakeException("Error while trying to do handshake");
