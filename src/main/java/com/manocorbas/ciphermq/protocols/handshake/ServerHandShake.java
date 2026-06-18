@@ -48,6 +48,7 @@ public class ServerHandShake {
                 Log.info(COMPONENT, "Registered new client: " + clientId);
 
             } catch (Exception e) {
+                System.out.println("Erro no registr ============ \n " + e.getMessage());
                 sendError("REGISTRATION_FAILED");
                 return new HandshakeResult(null, null, false);
             }

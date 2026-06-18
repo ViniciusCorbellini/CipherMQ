@@ -43,11 +43,12 @@ public class ClientHandler implements Runnable, ClientConnection {
     // Log
     private String COMPONENT = "CLIENTHANDLER";
 
-    public ClientHandler(Socket clientSocket, BrokerService brokerService, PublicKey pubKey) {
+    public ClientHandler(Socket clientSocket, BrokerService brokerService, PublicKey pubKey, PrivateKey privKey) {
         this.clientSocket = clientSocket;
         this.brokerService = brokerService;
         this.serverHandShake = new ServerHandShake(clientSocket);
         this.pubKey = pubKey;
+        this.privKey = privKey;
     }
 
     @Override

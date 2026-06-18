@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import com.manocorbas.ciphermq.server.registry.ClientRegistry;
@@ -30,6 +31,7 @@ public class Server {
             Log.error(COMPONENT, "Error while instantiating CA", e);
         } 
         PublicKey acPublicKey = acPair.getPublic();
+        PrivateKey acPrivateKey = acPair.getPrivate();
 
         TopicManager tm = new TopicManager();
         ClientRegistry cr = new ClientRegistry();
@@ -58,7 +60,8 @@ public class Server {
                         new ClientHandler(
                                 client,
                                 bs,
-                                acPublicKey
+                                acPublicKey,
+                                acPrivateKey
                         )
                 ).start();
             } catch (Exception e) {

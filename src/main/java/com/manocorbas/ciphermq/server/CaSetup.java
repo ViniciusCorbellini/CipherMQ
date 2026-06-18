@@ -35,7 +35,7 @@ public class CaSetup {
             return new KeyPair(pub, priv);
         }
 
-        Log.debug("CA", "No AC keys found — generating new pair...");
+        Log.debug("CA", "No AC keys found - generating new pair...");
         KeyPair pair = CertificateAuthority.generateACKeyPair();
         KeyStorage.savePrivateKey(pair.getPrivate(), PRIV_PATH);
         KeyStorage.savePublicKey(pair.getPublic(),  PUB_PATH);
