@@ -53,6 +53,14 @@ public class CommandParser {
     }
 
     private static ParsedCommand parseSign(String[] args) {
-        return ParsedCommand.sign();
+        String username = "default"; //default username 
+
+        for (int i = 1; i < args.length; i++) {
+            if (args[i].equals("--username") && i + 1 < args.length) {
+                username = args[i + 1];
+            }
+        }
+
+        return ParsedCommand.sign(username);
     }
 }

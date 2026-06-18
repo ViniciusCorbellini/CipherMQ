@@ -44,4 +44,10 @@ public class KeyStorage {
     public static ClientCertificate loadCertificate(Path path) throws Exception {
         return ClientCertificate.deserialize(Files.readString(path));
     }
+
+    public static PublicKey deserializePublicKey(String encoded) throws Exception {
+        byte[] bytes = Base64.getDecoder().decode(encoded);
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(bytes);
+        return KeyFactory.getInstance("RSA").generatePublic(spec);
+    }
 }

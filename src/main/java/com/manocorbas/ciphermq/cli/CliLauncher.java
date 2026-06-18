@@ -11,7 +11,7 @@ public class CliLauncher {
             switch (cmd.getMode()) {
                 case SERVER -> ServerCli.start(cmd.getPort());
                 case CLIENT -> ClientCli.start(cmd.getHost(), cmd.getPort());
-                case SIGN   -> SignCli.start();
+                case SIGN   -> SignCli.start(cmd.getUsername());
             }
 
         } catch (Exception e) {
@@ -25,6 +25,7 @@ public class CliLauncher {
             Usage:
                 srv --port <port>
                 cli --connect <host>:<port>
+                sign --username <username>
         """);
 
     }

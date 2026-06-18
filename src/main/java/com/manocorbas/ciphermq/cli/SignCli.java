@@ -8,18 +8,18 @@ import com.manocorbas.ciphermq.protocols.certificate.CertificateAuthority;
 import com.manocorbas.ciphermq.protocols.certificate.ClientCertificate;
 import com.manocorbas.ciphermq.server.CaSetup;
 import com.manocorbas.ciphermq.util.KeyStorage;
+import com.manocorbas.ciphermq.util.PathUtil;
 import com.manocorbas.ciphermq.util.log.Log;
 
 public class SignCli {
 
-    private static final Path CLIENTS_DIR = Path.of("/data/clients");
+    private static final Path CLIENTS_DIR = PathUtil.CLIENTS_DIR;
 
-    public static void start() throws Exception {
+    public static void start(String username) throws Exception {
         String COMPONENT = "SIGNCLI";
 
         Log.debug(COMPONENT, "SignCli Started");
 
-        String username = System.getenv("SIGN_USERNAME").strip();
         if (username == null || username.isBlank()) {
             throw new IllegalArgumentException("SIGN_USERNAME env var not set");
         }

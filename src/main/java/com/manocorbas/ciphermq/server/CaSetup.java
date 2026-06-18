@@ -9,10 +9,15 @@ import java.security.PublicKey;
 import com.manocorbas.ciphermq.protocols.certificate.CertificateAuthority;
 import com.manocorbas.ciphermq.util.KeyStorage;
 import com.manocorbas.ciphermq.util.log.Log;
+import com.manocorbas.ciphermq.util.PathUtil;
 
+/**
+ * Obs: O broker serve como uma CA para assinar os clientes.
+ * Ainda assim, os clientes devem validar o broker pela CA (professor)
+ */
 public class CaSetup {
 
-    private static final Path AC_DIR    = Path.of("/data/ac");
+    private static final Path AC_DIR    = PathUtil.AC_DIR;
     private static final Path PRIV_PATH = AC_DIR.resolve("ac_priv.key");
     private static final Path PUB_PATH  = AC_DIR.resolve("ac_pub.key");
 

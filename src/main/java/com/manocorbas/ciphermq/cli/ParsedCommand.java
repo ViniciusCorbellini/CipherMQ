@@ -28,9 +28,10 @@ public class ParsedCommand {
         return cmd;
     }
 
-    public static ParsedCommand sign() {
+    public static ParsedCommand sign(String username) {
         ParsedCommand cmd = new ParsedCommand();
         cmd.mode = Mode.SIGN;
+        cmd.username = username;
         return cmd;
     }
 
