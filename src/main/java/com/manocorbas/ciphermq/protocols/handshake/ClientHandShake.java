@@ -3,15 +3,20 @@ package com.manocorbas.ciphermq.protocols.handshake;
 import java.io.IOException;
 import java.net.Socket;
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 import java.util.Base64;
 
 import com.manocorbas.ciphermq.client.ClientCredentials;
 import com.manocorbas.ciphermq.client.ClientSetup;
 import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
+import com.manocorbas.ciphermq.exceptions.HandShakeException;
 import com.manocorbas.ciphermq.protocols.certificate.ClientCertificate;
 import com.manocorbas.ciphermq.util.FrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
+import com.manocorbas.ciphermq.util.PathUtil;
+import com.manocorbas.ciphermq.util.X509Util;
+import com.manocorbas.ciphermq.util.log.Log;
 
 public class ClientHandShake {
 
@@ -79,6 +84,27 @@ public class ClientHandShake {
                 : certificate.clientId();
 
         return new HandshakeResult(clientId, hello.sessionId(), true);
+    }
+
+    // Setp 0: Broker sends his cert
+    private void validateBroker() throws Exception {
+        String json = FrameUtil.receive(socket.getInputStream());
+        Message m = JsonUtil.fromJson(json, Message.class);
+
+        if (m.action() != ActionType.BROKER_CERTIFICATE) {
+            throw new HandShakeException("Expected BROKER_HELLO, got: " + m.action());
+        }
+
+        X509Certificate brokerCert = X509Util.deserialize(m.content());
+        X509Certificate caCert = X509Util.loadCertificate(PathUtil.CA_CERT);
+
+        try {
+            X509Util.verifyCertificate(brokerCert, caCert);
+        } catch (Exception e) {
+            throw new HandShakeException("Broker certificate validation failed: " + e.getMessage());
+        }
+
+        Log.info("CLIENTHANDSHAKE", "Broker certificate validated successfully");
     }
 
     // Step 1: CLIENT_HELLO (CONNECT)

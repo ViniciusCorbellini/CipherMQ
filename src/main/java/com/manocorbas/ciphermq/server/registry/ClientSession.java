@@ -4,7 +4,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.manocorbas.ciphermq.common.Message;
-import com.manocorbas.ciphermq.server.ClientConnection;
+import com.manocorbas.ciphermq.server.model.ClientConnection;
 
 public class ClientSession {
 

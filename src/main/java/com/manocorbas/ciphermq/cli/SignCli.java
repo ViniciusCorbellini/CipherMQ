@@ -7,6 +7,7 @@ import java.security.KeyPairGenerator;
 import com.manocorbas.ciphermq.protocols.certificate.CertificateAuthority;
 import com.manocorbas.ciphermq.protocols.certificate.ClientCertificate;
 import com.manocorbas.ciphermq.server.CaSetup;
+import com.manocorbas.ciphermq.server.model.BrokerCredentials;
 import com.manocorbas.ciphermq.util.KeyStorage;
 import com.manocorbas.ciphermq.util.PathUtil;
 import com.manocorbas.ciphermq.util.log.Log;
@@ -25,7 +26,7 @@ public class SignCli {
         }
 
         // Loads or generates the CA's key pair
-        KeyPair acPair = CaSetup.initAC();
+        BrokerCredentials creds = CaSetup.initBroker();
 
         Path clientDir = CLIENTS_DIR.resolve(username);
 
@@ -38,7 +39,7 @@ public class SignCli {
         ClientCertificate cert = CertificateAuthority.signClient(
                 username,
                 clientPair.getPublic(),
-                acPair.getPrivate());
+                creds.privateKey());
 
         // saves those in the client dir
         KeyStorage.savePrivateKey(clientPair.getPrivate(), clientDir.resolve("client_priv.key"));

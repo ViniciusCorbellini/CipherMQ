@@ -12,6 +12,7 @@ public enum ActionType {
     GET_TOPICS("get_top"),
 
     // 3way register handshake 
+    BROKER_CERTIFICATE("brk_crt"),
     REGISTER("reg"),
     CONNECT("con"),
 

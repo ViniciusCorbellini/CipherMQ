@@ -1,4 +1,4 @@
-package com.manocorbas.ciphermq.server;
+package com.manocorbas.ciphermq.server.model;
 
 import com.manocorbas.ciphermq.common.Message;
 

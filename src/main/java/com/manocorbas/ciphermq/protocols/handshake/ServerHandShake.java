@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 
 import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
@@ -13,6 +14,7 @@ import com.manocorbas.ciphermq.server.registry.SessionIdGenerator;
 import com.manocorbas.ciphermq.util.FrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
 import com.manocorbas.ciphermq.util.KeyStorage;
+import com.manocorbas.ciphermq.util.X509Util;
 import com.manocorbas.ciphermq.util.log.Log;
 
 public class ServerHandShake {
@@ -30,8 +32,15 @@ public class ServerHandShake {
     /**
      * Executes the whole server-side MQ client registry
      */
-    public HandshakeResult doHandshake(PublicKey acPublicKey, PrivateKey acPrivKey) throws IOException {
+    public HandshakeResult doHandshake(PublicKey acPublicKey, PrivateKey acPrivKey, X509Certificate brokerCertificate) throws IOException {
+
+        // STEP ZERO: Broker sends his certificate
+        sendBrokerCert(brokerCertificate);
+
+        // FIST STEP: Client sends his <name>
         Message m = waitForClientHello();
+
+        // SECOND STEP: Client's certificate validation; Session ID generation
         String sessionId = SessionIdGenerator.generate();
         String clientName;
 
@@ -43,6 +52,7 @@ public class ServerHandShake {
 
                 ClientCertificate cert = CertificateAuthority.signClient(clientId, clientPubKey, acPrivKey);
 
+                // THIRD STEP: BROKER sends his hello (acks the user hello and sends the id)
                 sendHelloWithCert(sessionId, cert.serialize());
                 clientName = clientId;
                 Log.info(COMPONENT, "Registered new client: " + clientId);
@@ -60,6 +70,8 @@ public class ServerHandShake {
                     sendError("INVALID_CERTIFICATE");
                     return new HandshakeResult(null, null, false);
                 }
+
+                // THIRD STEP: BROKER sends his hello (acks the user hello and sends the id)
                 sendHelloWithCert(sessionId, null); // cert null = acesso normal
                 clientName = cert.clientId();
 
@@ -73,6 +85,9 @@ public class ServerHandShake {
             return new HandshakeResult(null, null, false);
         }
 
+        // FIFTH STEP:
+        // Client sends READY (third step of the three way handshake)
+        // so the server can finally REGISTER | CONNECT
         boolean clientReady = waitForReady();
         return new HandshakeResult(clientName, sessionId, clientReady);
     }
@@ -114,5 +129,14 @@ public class ServerHandShake {
         Message m = JsonUtil.fromJson(json, Message.class);
 
         return m.action() == ActionType.CLIENT_READY;
+    }
+
+    private void sendBrokerCert(X509Certificate cert) throws IOException {
+        try {
+            Message m = new Message(ActionType.BROKER_CERTIFICATE, null, X509Util.serialize(cert));
+            FrameUtil.send(socket.getOutputStream(), JsonUtil.toJson(m));
+        } catch (Exception e) {
+            throw new IOException("Failed to send broker certificate", e);
+        }
     }
 }
