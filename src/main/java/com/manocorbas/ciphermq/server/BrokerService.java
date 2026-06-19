@@ -7,6 +7,7 @@ import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.exceptions.NonExistentTopicException;
 import com.manocorbas.ciphermq.exceptions.UnauthorizedAccessException;
+import com.manocorbas.ciphermq.server.model.ClientConnection;
 import com.manocorbas.ciphermq.server.registry.ClientRegistry;
 import com.manocorbas.ciphermq.server.registry.ClientSession;
 import com.manocorbas.ciphermq.util.JsonUtil;

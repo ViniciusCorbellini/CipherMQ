@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 import java.security.PrivateKey;
 
 import com.manocorbas.ciphermq.common.Message;
@@ -14,14 +15,13 @@ import com.manocorbas.ciphermq.exceptions.NonExistentTopicException;
 import com.manocorbas.ciphermq.exceptions.UnauthorizedAccessException;
 import com.manocorbas.ciphermq.protocols.handshake.HandshakeResult;
 import com.manocorbas.ciphermq.protocols.handshake.ServerHandShake;
+import com.manocorbas.ciphermq.server.model.ClientConnection;
 import com.manocorbas.ciphermq.server.registry.ClientSession;
 import com.manocorbas.ciphermq.util.FrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
 import com.manocorbas.ciphermq.util.log.Log;
 
 public class ClientHandler implements Runnable, ClientConnection {
-
-    // TODO: error response
 
     // Handler
     private ClientSession session;
@@ -34,8 +34,11 @@ public class ClientHandler implements Runnable, ClientConnection {
 
     // protocols
     private ServerHandShake serverHandShake;
+
+    // security
     private PublicKey pubKey;
     private PrivateKey privKey;
+    private X509Certificate certificate;
 
     // thread
     private volatile boolean running = true;
@@ -43,12 +46,14 @@ public class ClientHandler implements Runnable, ClientConnection {
     // Log
     private String COMPONENT = "CLIENTHANDLER";
 
-    public ClientHandler(Socket clientSocket, BrokerService brokerService, PublicKey pubKey, PrivateKey privKey) {
+    public ClientHandler(Socket clientSocket, BrokerService brokerService, PublicKey pubKey, PrivateKey privKey,
+            X509Certificate certificate) {
         this.clientSocket = clientSocket;
         this.brokerService = brokerService;
         this.serverHandShake = new ServerHandShake(clientSocket);
         this.pubKey = pubKey;
         this.privKey = privKey;
+        this.certificate = certificate;
     }
 
     @Override
@@ -95,7 +100,7 @@ public class ClientHandler implements Runnable, ClientConnection {
 
     private ClientSession doHandShakeAndRegistry() throws IOException, HandShakeException {
         Log.info(COMPONENT, "Handshaking");
-        HandshakeResult result = serverHandShake.doHandshake(pubKey, privKey);
+        HandshakeResult result = serverHandShake.doHandshake(this.pubKey, this.privKey, this.certificate);
 
         if (!result.success())
             throw new HandShakeException("Error while trying to do handshake");

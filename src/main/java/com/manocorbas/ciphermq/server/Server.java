@@ -3,10 +3,11 @@ package com.manocorbas.ciphermq.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 
+import com.manocorbas.ciphermq.server.model.BrokerCredentials;
 import com.manocorbas.ciphermq.server.registry.ClientRegistry;
 import com.manocorbas.ciphermq.util.log.Log;
 
@@ -24,14 +25,16 @@ public class Server {
         boolean running = true;
 
         // =========== Dep Inj ==============
-        KeyPair acPair = null;
+        BrokerCredentials credentials = null;
         try {
-            acPair = CaSetup.initAC();
+            credentials = CaSetup.initBroker();
         } catch (Exception e) {
             Log.error(COMPONENT, "Error while instantiating CA", e);
         } 
-        PublicKey acPublicKey = acPair.getPublic();
-        PrivateKey acPrivateKey = acPair.getPrivate();
+        
+        PublicKey acPublicKey = credentials.publicKey();
+        PrivateKey acPrivateKey = credentials.privateKey();
+        X509Certificate certificate = credentials.certificate();
 
         TopicManager tm = new TopicManager();
         ClientRegistry cr = new ClientRegistry();
@@ -61,7 +64,8 @@ public class Server {
                                 client,
                                 bs,
                                 acPublicKey,
-                                acPrivateKey
+                                acPrivateKey,
+                                certificate
                         )
                 ).start();
             } catch (Exception e) {
