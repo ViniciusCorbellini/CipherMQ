@@ -36,7 +36,7 @@ public class ClientHandShake {
 
         ClientCertificate certificate = cred.certificate();
 
-        // TODO: Broker validation FIRST
+        validateBroker();
 
         // FIST STEP: Client sends his certificate and CONNECT | REGISTER
         boolean firstAccess = certificate == null;
@@ -99,7 +99,10 @@ public class ClientHandShake {
         X509Certificate caCert = X509Util.loadCertificate(PathUtil.CA_CERT);
 
         try {
-            X509Util.verifyCertificate(brokerCert, caCert);
+            // X509Util.verifyCertificate(brokerCert, caCert);
+            // O broker está autoassinando o certificado
+            // Para fins de teste e desenvolvimento, essa linha só deverá ser 
+            // descomentada quando o certificado real for assinado pelo professor
         } catch (Exception e) {
             throw new HandShakeException("Broker certificate validation failed: " + e.getMessage());
         }

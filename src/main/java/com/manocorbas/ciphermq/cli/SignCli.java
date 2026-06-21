@@ -6,7 +6,7 @@ import java.security.KeyPairGenerator;
 
 import com.manocorbas.ciphermq.protocols.certificate.CertificateAuthority;
 import com.manocorbas.ciphermq.protocols.certificate.ClientCertificate;
-import com.manocorbas.ciphermq.server.CaSetup;
+import com.manocorbas.ciphermq.server.ca.CaSetup;
 import com.manocorbas.ciphermq.server.model.BrokerCredentials;
 import com.manocorbas.ciphermq.util.KeyStorage;
 import com.manocorbas.ciphermq.util.PathUtil;
