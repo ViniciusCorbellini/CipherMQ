@@ -16,9 +16,10 @@ clean:
 run_srv:
 	java -cp target/CipherMQ-1.0-SNAPSHOT.jar com.manocorbas.ciphermq.App srv --port $(PORT)
 
-# example: make run_cli HOST=192.168.0.10 PORT=8008
+# exemplo: make run_cli HOST=172.26.222.123 PORT=8080 CA_CERT=~/Downloads/ca.crt
 run_cli:
-	java -cp target/CipherMQ-1.0-SNAPSHOT.jar com.manocorbas.ciphermq.App cli --connect $(HOST):$(PORT)
+	java -cp target/CipherMQ-1.0-SNAPSHOT.jar com.manocorbas.ciphermq.App \
+	  cli --connect $(HOST):$(PORT) --ca-cert $(CA_CERT)
 
 # example: make sign USERNAME=alice
 sign:

@@ -7,6 +7,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
+import com.manocorbas.ciphermq.server.ca.CaSetup;
 import com.manocorbas.ciphermq.server.model.BrokerCredentials;
 import com.manocorbas.ciphermq.server.registry.ClientRegistry;
 import com.manocorbas.ciphermq.util.log.Log;

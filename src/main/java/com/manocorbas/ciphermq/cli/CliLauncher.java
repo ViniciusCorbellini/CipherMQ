@@ -9,8 +9,8 @@ public class CliLauncher {
             ParsedCommand cmd = CommandParser.parse(args);
 
             switch (cmd.getMode()) {
-                case SERVER -> ServerCli.start(cmd.getPort());
-                case CLIENT -> ClientCli.start(cmd.getHost(), cmd.getPort());
+                case SERVER -> ServerCli.start(cmd.getPort(), cmd.getPath());
+                case CLIENT -> ClientCli.start(cmd.getHost(), cmd.getPort(), cmd.getPath());
                 case SIGN   -> SignCli.start(cmd.getUsername());
             }
 

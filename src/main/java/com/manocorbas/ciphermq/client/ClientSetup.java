@@ -28,6 +28,8 @@ public class ClientSetup {
 
         if (Files.exists(certPath) && Files.exists(privPath)) {
             // client is already registered
+            Log.info("CLIENTSETUP",
+                "Loading credentials for " + username);
             PrivateKey priv = KeyStorage.loadPrivateKey(privPath);
             PublicKey pub = KeyStorage.loadPublicKey(pubPath);
             ClientCertificate cert = KeyStorage.loadCertificate(certPath);
@@ -45,6 +47,7 @@ public class ClientSetup {
         KeyStorage.savePrivateKey(pair.getPrivate(), privPath);
         KeyStorage.savePublicKey(pair.getPublic(), pubPath);
 
+        // No cerificate is returned; The broker will sign and send one during the handshake
         return new ClientCredentials(username, pair.getPublic(), pair.getPrivate(), null);
     }
 
