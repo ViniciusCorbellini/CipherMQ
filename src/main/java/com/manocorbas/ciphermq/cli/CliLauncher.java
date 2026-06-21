@@ -23,8 +23,8 @@ public class CliLauncher {
     private static void printHelp() {
         System.out.println("""
             Usage:
-                srv --port <port>
-                cli --connect <host>:<port>
+                srv --port <port> --broker-cert <path/to/broker.crt>
+                cli --connect <host>:<port> --ca-cert <path/to/ca.crt>
                 sign --username <username>
         """);
 
