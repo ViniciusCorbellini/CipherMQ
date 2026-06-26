@@ -12,6 +12,7 @@ import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.exceptions.HandShakeException;
 import com.manocorbas.ciphermq.protocols.certificate.ClientCertificate;
+import com.manocorbas.ciphermq.util.CipherUtil;
 import com.manocorbas.ciphermq.util.FrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
 import com.manocorbas.ciphermq.util.PathUtil;
@@ -21,6 +22,8 @@ import com.manocorbas.ciphermq.util.log.Log;
 public class ClientHandShake {
 
     private final Socket socket;
+
+    private PublicKey extractedCaPublicKey;
 
     public ClientHandShake(Socket socket) {
         this.socket = socket;
@@ -36,10 +39,13 @@ public class ClientHandShake {
 
         ClientCertificate certificate = cred.certificate();
 
+        // STEP ZERO: broker validation
         validateBroker();
 
         // FIST STEP: Client sends his certificate and CONNECT | REGISTER
         boolean firstAccess = certificate == null;
+
+        System.out.println("First Acess: " + firstAccess);
 
         if (firstAccess) {
             sendHello(ActionType.REGISTER, cred.username(), cred.publicKey());
@@ -59,7 +65,7 @@ public class ClientHandShake {
          * the broker sends an ACK for the user and the ServerHelloPayload
          * so the client waits for it:
          */
-        ServerHelloPayload hello = waitForServerHello();
+        ServerHelloPayload hello = waitForServerHello(cred);
 
         /**
          * FOURTH STEP:
@@ -69,6 +75,7 @@ public class ClientHandShake {
             // saves the received cert in disk
             ClientCertificate signedCert = ClientCertificate.deserialize(hello.certSerialized());
             ClientSetup.saveCertificate(cred.username(), signedCert);
+            cred = new ClientCredentials(cred.username(), cred.publicKey(), cred.privateKey(), signedCert);
         }
 
         // FIFTH STEP:
@@ -83,7 +90,7 @@ public class ClientHandShake {
                 ? ClientCertificate.deserialize(hello.certSerialized()).clientId()
                 : certificate.clientId();
 
-        return new HandshakeResult(clientId, hello.sessionId(), true);
+        return new HandshakeResult(clientId, hello.sessionId(), true, extractedCaPublicKey);
     }
 
     // Setp 0: Broker sends his cert
@@ -99,10 +106,9 @@ public class ClientHandShake {
         X509Certificate caCert = X509Util.loadCertificate(PathUtil.CA_CERT);
 
         try {
-            // X509Util.verifyCertificate(brokerCert, caCert);
-            // O broker está autoassinando o certificado
-            // Para fins de teste e desenvolvimento, essa linha só deverá ser 
-            // descomentada quando o certificado real for assinado pelo professor
+            X509Util.verifyCertificate(brokerCert, caCert);
+
+            this.extractedCaPublicKey = brokerCert.getPublicKey();
         } catch (Exception e) {
             throw new HandShakeException("Broker certificate validation failed: " + e.getMessage());
         }
@@ -131,7 +137,7 @@ public class ClientHandShake {
     }
 
     // Step 3: client side SERVER HELLO
-    private ServerHelloPayload waitForServerHello() throws Exception {
+    private ServerHelloPayload waitForServerHello(ClientCredentials cred) throws Exception {
         String messageJson = FrameUtil.receive(socket.getInputStream());
         Message m = JsonUtil.fromJson(messageJson, Message.class);
 
@@ -142,16 +148,16 @@ public class ClientHandShake {
             throw new Exception("Expected SERVER_HELLO, got: " + m.action());
         }
 
-        return JsonUtil.fromJson(m.content(), ServerHelloPayload.class);
+        // Abre o envelope digital usando a PrivateKey privada do cliente
+        String decryptedJsonPayload = CipherUtil.openEnvelope(m.content(), cred.privateKey());
+
+        // Agora reconstrói e devolve o ServerHelloPayload com segurança
+        return JsonUtil.fromJson(decryptedJsonPayload, ServerHelloPayload.class);
     }
 
     // Step 5: client sends ack
     private void sendReady() throws IOException {
         Message m = new Message(ActionType.CLIENT_READY, null, null);
-
-        String ack = JsonUtil.toJson(m);
-
-        FrameUtil.send(socket.getOutputStream(), ack);
+        FrameUtil.send(socket.getOutputStream(), JsonUtil.toJson(m));
     }
-
 }

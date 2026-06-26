@@ -2,13 +2,21 @@ package com.manocorbas.ciphermq.client;
 
 import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
+import com.manocorbas.ciphermq.kms.KmsAction;
 import com.manocorbas.ciphermq.protocols.handshake.HandshakeResult;
+import com.manocorbas.ciphermq.util.CipherUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
 import com.manocorbas.ciphermq.util.log.Log;
+
+import java.security.KeyStore.Entry;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.crypto.SecretKey;
 
 public class Client {
 
@@ -17,21 +25,31 @@ public class Client {
     private String sessionId;
     private Queue<Message> messageQueue;
     private Set<String> subscribedIn = new HashSet<>();
+    private ClientCredentials creds;
 
     // net
     private ClientConnection connection;
+    private KmsClientConnection kmsConnection;
+
+    // cripto
+    private final Map<String, SecretKey> topicKeys = new ConcurrentHashMap<>();
 
     // log
     private final String COMPONENT = "CLIENT";
 
     public void connect(ConnectRequest c) throws Exception {
+        this.creds = c.credentials();
         this.messageQueue = new ConcurrentLinkedQueue<>();
-        this.connection = new ClientConnection(messageQueue);
+        this.connection = new ClientConnection(messageQueue, topicKeys);
+        this.kmsConnection = new KmsClientConnection(c.kmsHost(), c.kmsPort(), creds);
 
         HandshakeResult result = connection.connect(c);
 
         this.username = result.clientName();
         this.sessionId = result.sessionId();
+
+        SecretKey secretKey = CipherUtil.deriveSessionKey(sessionId);
+        this.connection.setSessionKey(secretKey);
 
         this.connection.startListening();
         fetchTopics();
@@ -46,6 +64,7 @@ public class Client {
                 null);
 
         connection.send(msg);
+        notifyKms(KmsAction.GET_KEY, topic);
     }
 
     public void unsubscribe(String topic) {
@@ -59,13 +78,15 @@ public class Client {
         connection.send(msg);
     }
 
-    public void publish(String topic, String content) {
+    public void publish(String topic, String content) throws Exception {
         Log.info(COMPONENT, "Publishing message: <" + content + "> to topic: " + topic);
+
+        String encrypted = CipherUtil.encryptWithSessionKey(content, topicKeys.get(topic));
 
         Message msg = new Message(
                 ActionType.PUBLISH,
                 topic,
-                content);
+                encrypted);
 
         connection.send(msg);
     }
@@ -79,6 +100,26 @@ public class Client {
                 null);
 
         connection.send(msg);
+        notifyKms(KmsAction.INIT_TOPIC, topic);
+    }
+
+    public void notifyKms(KmsAction action, String topic) {
+        try {
+            // Pequena pausa ou aguardar confirmação do broker pode ser necessária
+            // dependendo do timing
+            Thread.sleep(100);
+
+            String keyEnvelope = kmsConnection.requestKeyFromKms(action, topic);
+
+            String secretKeyB64 = CipherUtil.openEnvelope(keyEnvelope, creds.privateKey());
+            SecretKey secretKey = CipherUtil.deserializeSecretKey(secretKeyB64);
+
+            topicKeys.put(topic, secretKey);
+            Log.info(COMPONENT, "Key for topic [" + topic + "] stored locally and ready for E2E!");
+
+        } catch (Exception e) {
+            Log.error(COMPONENT, "Failed to initialize/fetch topic key in KMS: " + e.getMessage(), e);
+        }
     }
 
     public void fetchTopics() throws Exception {

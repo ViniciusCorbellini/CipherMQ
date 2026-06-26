@@ -17,6 +17,12 @@ public class PathUtil {
     // Client
     public static final Path CLIENTS_DIR = BASE.resolve("clients");
 
+    // KMS
+    public static final Path KMS_DIR = CLIENTS_DIR;
+    public static final Path KMS_PRIV = KMS_DIR.resolve("kms_priv.key");
+    public static final Path KMS_PUB = KMS_DIR.resolve("kms_pub.key");
+    public static final Path KMS_KEYSTORE = KMS_DIR.resolve("keystore.json");
+
     public static Path clientsDir(String username) {
         return CLIENTS_DIR.resolve(username);
     }

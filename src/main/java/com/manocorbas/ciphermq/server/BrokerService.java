@@ -30,33 +30,62 @@ public class BrokerService {
 
         Log.debug(COMPONENT, "Handling message | action: " + msg.action());
 
-        switch (msg.action()) {
+        ActionType msgAction = (ActionType) msg.action();
 
-            case SUBSCRIBE -> {
+        switch (msgAction) {
+            case SUBSCRIBE: {
                 topicManager.subscribe(msg.topic(), client.getClientId());
+                break; // <-- Faltava o break!
             }
 
-            case UNSUBSCRIBE -> {
+            case UNSUBSCRIBE: {
                 topicManager.unsubscribe(msg.topic(), client.getClientId());
+                break; // <-- Faltava o break!
             }
 
-            case PUBLISH -> {
+            case PUBLISH: {
                 publish(msg, client);
+                break; // <-- Faltava o break!
             }
 
-            case CREATE_TOPIC -> {
+            case CREATE_TOPIC: {
                 topicManager.createTopic(msg.topic(), client.getClientId());
+                break; // <-- Faltava o break!
             }
 
-            case GET_TOPICS -> {
+            case GET_TOPICS: {
                 sendTopics(client);
+                break; // <-- Faltava o break!
             }
 
-            default -> {
+            case CHECK_SUBSCRIPTION: {
+                checkSubscription(msg, client);
+                break; // <-- Faltava o break!
+            }
+
+            default: {
                 Log.debug(COMPONENT, "Unexpected value read");
                 throw new IllegalArgumentException("Unexpected value: " + msg.action());
             }
         }
+    }
+
+    private void checkSubscription(Message m, ClientSession kmsSession) {
+        
+        // Client's id to be validated 
+        String targetClientId = m.content();
+        String topic = m.topic();
+
+        Message answer;
+
+        if (topicManager.topicContainsClient(topic, targetClientId)) {
+            answer = new Message(ActionType.SUBSCRIPTION_RESULT, topic, "true");
+        } else {
+            answer = new Message(ActionType.SUBSCRIPTION_RESULT, topic, "false");
+        }
+
+        kmsSession.enqueue(answer);
+        kmsSession.flushQueue();
     }
 
     public void disconnect(ClientSession session) {
@@ -79,7 +108,7 @@ public class BrokerService {
 
         Set<String> subscribers = topicManager.getSubscribers(message.topic());
 
-        Log.debug(COMPONENT, "Enqueueing message to " + subscribers.size() + " users (including publisher)");
+        Log.debug(COMPONENT, "Enqueueing message " + message.content() + " to " + subscribers.size() + " users (including publisher)");
         message = new Message(message.action(), topic, message.content(), session.getClientId(), LocalDateTime.now());
 
         for (String clientId : subscribers) {

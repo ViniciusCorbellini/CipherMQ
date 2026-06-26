@@ -10,8 +10,9 @@ public class CliLauncher {
 
             switch (cmd.getMode()) {
                 case SERVER -> ServerCli.start(cmd.getPort(), cmd.getPath());
-                case CLIENT -> ClientCli.start(cmd.getHost(), cmd.getPort(), cmd.getPath());
+                case CLIENT -> ClientCli.start(cmd.getHost(), cmd.getPort(), cmd.getKmsHost(), cmd.getKmsPort(), cmd.getPath());
                 case SIGN   -> SignCli.start(cmd.getUsername());
+                case KMS -> KmsCli.start(cmd.getPort(), cmd.getHost(), cmd.getBrokerPort(), cmd.getPath());
             }
 
         } catch (Exception e) {
@@ -24,7 +25,8 @@ public class CliLauncher {
         System.out.println("""
             Usage:
                 srv --port <port> --broker-cert <path/to/broker.crt>
-                cli --connect <host>:<port> --ca-cert <path/to/ca.crt>
+                cli --connect <host>:<port> --kms <kms-host>:<kms-port> --ca-cert <path/to/ca.crt>
+                kms --port <kmsPort> --broker <host>:<port> [--ca-cert <path>]
                 sign --username <username>
         """);
 

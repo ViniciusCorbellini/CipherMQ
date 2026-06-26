@@ -11,7 +11,7 @@ import com.manocorbas.ciphermq.util.log.Log;
 
 public class ClientCli {
 
-    public static void start(String host, int port, String caCertPath) throws IOException {
+    public static void start(String host, int port, String kmsHost, int kmsPort, String caCertPath) throws IOException {
 
         if (caCertPath != null) {
             Path source = Path.of(caCertPath);
@@ -33,7 +33,7 @@ public class ClientCli {
 
         Log.debug("CLIENTCLI", "Client CLI started");
 
-        Dashboard dashboard = new Dashboard(host, port);
+        Dashboard dashboard = new Dashboard(host, port, kmsHost, kmsPort);
         dashboard.pack();
         dashboard.setVisible(true);
     }

@@ -11,6 +11,7 @@ import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.protocols.certificate.CertificateAuthority;
 import com.manocorbas.ciphermq.protocols.certificate.ClientCertificate;
 import com.manocorbas.ciphermq.server.registry.SessionIdGenerator;
+import com.manocorbas.ciphermq.util.CipherUtil;
 import com.manocorbas.ciphermq.util.FrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
 import com.manocorbas.ciphermq.util.KeyStorage;
@@ -18,8 +19,6 @@ import com.manocorbas.ciphermq.util.X509Util;
 import com.manocorbas.ciphermq.util.log.Log;
 
 public class ServerHandShake {
-
-    // TODO: ERROR RESPONSE (HandShakeException)
 
     private final Socket socket;
 
@@ -37,28 +36,28 @@ public class ServerHandShake {
         // STEP ZERO: Broker sends his certificate
         sendBrokerCert(brokerCertificate);
 
-        // FIST STEP: Client sends his <name>
+        // FIST STEP: Client sends hello (REGISTER or CONNECT)
         Message m = waitForClientHello();
 
         // SECOND STEP: Client's certificate validation; Session ID generation
         String sessionId = SessionIdGenerator.generate();
         String clientName;
+        PublicKey clientPubKey = null;
 
         if (m.action() == ActionType.REGISTER) {
             try {
                 // topic carrega o username, content carrega a pubKey serializada
                 String clientId = m.topic();
-                PublicKey clientPubKey = KeyStorage.deserializePublicKey(m.content());
-
+                clientPubKey = KeyStorage.deserializePublicKey(m.content());
                 ClientCertificate cert = CertificateAuthority.signClient(clientId, clientPubKey, acPrivKey);
 
                 // THIRD STEP: BROKER sends his hello (acks the user hello and sends the id)
-                sendHelloWithCert(sessionId, cert.serialize());
+                sendHelloWithCert(sessionId, cert.serialize(), clientPubKey);
                 clientName = clientId;
                 Log.info(COMPONENT, "Registered new client: " + clientId);
 
             } catch (Exception e) {
-                System.out.println("Erro no registr ============ \n " + e.getMessage());
+                System.out.println("Erro no registro ============ \n " + e.getMessage());
                 sendError("REGISTRATION_FAILED");
                 return new HandshakeResult(null, null, false);
             }
@@ -66,17 +65,21 @@ public class ServerHandShake {
         } else if (m.action() == ActionType.CONNECT) {
             try {
                 ClientCertificate cert = ClientCertificate.deserialize(m.content());
+                
                 if (!CertificateAuthority.verifyCertificate(cert, acPublicKey)) {
                     sendError("INVALID_CERTIFICATE");
                     return new HandshakeResult(null, null, false);
                 }
 
+                clientPubKey = cert.clientPublicKey();
+
                 // THIRD STEP: BROKER sends his hello (acks the user hello and sends the id)
-                sendHelloWithCert(sessionId, null); // cert null = acesso normal
+                sendHelloWithCert(sessionId, null, clientPubKey); // cert null = acesso normal
                 clientName = cert.clientId();
 
             } catch (Exception e) {
                 sendError("MALFORMED_CERTIFICATE");
+                Log.error(COMPONENT, e.getLocalizedMessage(), e);
                 return new HandshakeResult(null, null, false);
             }
 
@@ -92,10 +95,17 @@ public class ServerHandShake {
         return new HandshakeResult(clientName, sessionId, clientReady);
     }
 
-    // SERVER_HELLO sempre carrega um ServerHelloPayload — cert é null em CONNECT
-    private void sendHelloWithCert(String sessionId, String certSerialized) throws IOException {
+    /**
+     * Serializes ServerHelloPayload, ciphers it using client's pub key (digital envelope)
+     */
+    private void sendHelloWithCert(String sessionId, String certSerialized, PublicKey clientPublicKey) throws Exception {
         ServerHelloPayload payload = new ServerHelloPayload(sessionId, certSerialized);
-        Message m = new Message(ActionType.SERVER_HELLO, null, JsonUtil.toJson(payload));
+        String jsonPayload = JsonUtil.toJson(payload);
+        
+        // Protege o conteúdo do ServerHello (incluindo o sessionId que agirá como chave)
+        String sealedEnvelope = CipherUtil.sealEnvelope(jsonPayload, clientPublicKey);
+        
+        Message m = new Message(ActionType.SERVER_HELLO, null, sealedEnvelope);
         FrameUtil.send(socket.getOutputStream(), JsonUtil.toJson(m));
     }
 

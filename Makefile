@@ -1,6 +1,16 @@
 # Defaults
+#DEFAULT BROKER 
 HOST ?= 127.0.0.1
 PORT ?= 8080
+
+# BROKER ON KMS' VIEW
+BHOST ?= 127.0.0.1
+BPORT ?= 8080
+
+# KMS ON USER'S VIEW
+KHOST ?= 127.0.0.1
+KPORT ?= 9090
+
 USERNAME ?= user
 BROKER_DIR = $(HOME)/.ciphermq/broker
 BACKUP_NAME = ciphermq-broker-keys.tar.gz
@@ -19,11 +29,17 @@ clean:
 run_srv:
 	java -cp target/CipherMQ-1.0-SNAPSHOT.jar com.manocorbas.ciphermq.App srv --port $(PORT) --broker-cert $(BROKER_CERT)
 
-# exemplo: make run_cli HOST=172.26.222.123 PORT=8080 CA_CERT=~/Downloads/ca.crt
-# 		   make run_cli HOST=172.26.222.123 PORT=8080 CA_CERT=C:\Users\Cliente\Downloads\ca.crt
+# exemple: make run_cli HOST=172.26.222.123 PORT=8080 CA_CERT=~/Downloads/ca.crt
+# 		   make run_cli HOST=172.26.222.123 PORT=8080 KHOST=172.26.222.123 KPORT=9090 CA_CERT=C:\Users\Cliente\Downloads\ca.crt
+# --kms <kms-host>:<kms-port>
 run_cli:
 	java -cp target/CipherMQ-1.0-SNAPSHOT.jar com.manocorbas.ciphermq.App \
-	  cli --connect $(HOST):$(PORT) --ca-cert $(CA_CERT)
+	  cli --connect $(HOST):$(PORT) --kms $(KHOST):$(KPORT) --ca-cert $(CA_CERT)
+
+# exemple: make run_kms PORT=9090 BHOST=172.26.222.123 BPORT=8080 CA_CERT=C:\Users\Cliente\Downloads\ca.crt
+run_kms:
+	java -cp target/CipherMQ-1.0-SNAPSHOT.jar com.manocorbas.ciphermq.App \
+	  kms --port $(PORT) --broker $(BHOST):$(BPORT) --ca-cert $(CA_CERT)
 
 # example: make sign USERNAME=alice
 sign:
