@@ -1,16 +1,16 @@
 package com.manocorbas.ciphermq.kms;
 
+import java.net.Socket;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Base64;
+
+import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.protocols.certificate.CertificateAuthority;
 import com.manocorbas.ciphermq.protocols.certificate.ClientCertificate;
 import com.manocorbas.ciphermq.util.FrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
 import com.manocorbas.ciphermq.util.log.Log;
-import com.manocorbas.ciphermq.common.Message;
-
-import java.net.Socket;
-import java.security.PublicKey;
-import java.security.PrivateKey;
-import java.util.Base64;
 
 /**
  * Handshake do lado servidor do KMS.
@@ -88,7 +88,6 @@ public class KmsHandshake {
     }
 
     private ClientCertificate receiveClientCert() throws Exception {
-        System.out.println("Cheguei aqui no receiveClient");
         String json = FrameUtil.receive(socket.getInputStream());
         Message msg = JsonUtil.fromJson(json, Message.class);
 
@@ -110,7 +109,6 @@ public class KmsHandshake {
     }
 
     private void waitForReady() throws Exception {
-        System.out.println("Cheguei aqui no wait");
         String json = FrameUtil.receive(socket.getInputStream());
         Message msg = JsonUtil.fromJson(json, Message.class);
         if (msg.action() != KmsAction.KMS_READY) {

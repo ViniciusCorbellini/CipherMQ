@@ -1,5 +1,14 @@
 package com.manocorbas.ciphermq.client;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import javax.crypto.SecretKey;
+
 import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.kms.KmsAction;
@@ -7,16 +16,6 @@ import com.manocorbas.ciphermq.protocols.handshake.HandshakeResult;
 import com.manocorbas.ciphermq.util.CipherUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
 import com.manocorbas.ciphermq.util.log.Log;
-
-import java.security.KeyStore.Entry;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.crypto.SecretKey;
 
 public class Client {
 

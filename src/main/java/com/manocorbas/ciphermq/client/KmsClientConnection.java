@@ -46,9 +46,6 @@ public class KmsClientConnection {
             KmsAction connectAction = (creds.certificate() == null) ? KmsAction.KMS_REGISTER : KmsAction.KMS_CONNECT;
             String certSerialized = (creds.certificate() == null) ? creds.username() : creds.certificate().serialize(); 
             // Nota: Adapte o conteúdo se o seu REGISTER exigir a chave pública em vez do username puro
-            
-            System.out.println(connectAction);
-            System.out.println(certSerialized);
 
             Message step2Msg = new Message(connectAction, null, certSerialized);
             FrameUtil.send(socket.getOutputStream(), JsonUtil.toJson(step2Msg));

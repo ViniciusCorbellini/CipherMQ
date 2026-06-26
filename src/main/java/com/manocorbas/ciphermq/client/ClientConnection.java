@@ -2,8 +2,10 @@ package com.manocorbas.ciphermq.client;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Queue;
+
 import javax.crypto.SecretKey;
 
 import com.manocorbas.ciphermq.common.ActionType;
@@ -76,11 +78,9 @@ public class ClientConnection {
                     if (this.sessionKey != null) {
                         // Descriptografa a camada de transporte Broker -> Cliente
                         json = CipherUtil.decryptWithSessionKey(json, this.sessionKey);
-                        System.out.println("Json: " + json);
                     }
 
                     Message msg = JsonUtil.fromJson(json, Message.class);
-                    System.out.println("Content: " + msg.content());
 
                     // E2E: Se for uma mensagem publicada em um tópico, descriptografa
                     if (msg.action() == ActionType.PUBLISH) {
@@ -93,7 +93,7 @@ public class ClientConnection {
                                 String decryptedContent = CipherUtil.decryptWithSessionKey(msg.content(), topicKey);
 
                                 // Substitui o conteúdo criptografado pelo texto claro original
-                                msg = new Message(msg.action(), topic, decryptedContent);
+                                msg = new Message(msg.action(), topic, decryptedContent, msg.sender(), msg.time());
 
                             } catch (Exception cryptoEx) {
                                 Log.error(COMPONENT, "Failed to decrypt E2E payload for topic: " + topic, cryptoEx);
@@ -104,9 +104,9 @@ public class ClientConnection {
                             Log.warn(COMPONENT, "Received PUBLISH for topic [" + topic + "] but local key is missing.");
                             msg = new Message(msg.action(), topic, "[ERRO: Chave E2E ausente para este tópico]");
                         }
+
                     }
                     messageQueue.add(msg);
-
                 }
 
             } catch (Exception e) {
