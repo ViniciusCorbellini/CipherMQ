@@ -68,3 +68,6 @@ import_broker:
 # # Extrai o zip
 # Expand-Archive -Path "$env:USERPROFILE\Downloads\ciphermq-broker-keys.tar.gz" -DestinationPath "$env:USERPROFILE\.ciphermq" -Force
 # OU: tar -xzf "$env:USERPROFILE\Downloads\ciphermq-broker-keys.tar.gz" -C "$env:USERPROFILE\.ciphermq"
+
+# Testar o TCP em powershell:
+# Test-NetConnection -ComputerName 10.151.32.96 -Port 8080
