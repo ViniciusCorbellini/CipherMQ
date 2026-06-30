@@ -2,7 +2,6 @@ package com.manocorbas.ciphermq.server.ca;
 
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
@@ -21,10 +20,6 @@ import com.manocorbas.ciphermq.util.log.Log;
  * Ainda assim, os clientes devem validar o broker pela CA (professor)
  */
 public class CaSetup {
-
-    private static final Path BROKER_DIR = PathUtil.BROKER_DIR;
-    private static final Path PRIV_PATH = BROKER_DIR.resolve("ac_priv.key");
-    private static final Path PUB_PATH = BROKER_DIR.resolve("ac_pub.key");
 
     /**
      * If the CA's keys and certificate dont exist, generates ands saves them.

@@ -3,7 +3,7 @@ package com.manocorbas.ciphermq.common;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum ActionType {
+public enum ActionType implements Action {
     // pub-sub
     SUBSCRIBE("sub"),
     UNSUBSCRIBE("unsub"),
@@ -19,9 +19,12 @@ public enum ActionType {
     SERVER_HELLO("srv_hll"),
     CLIENT_READY("clt_rdy"),
 
+    // KMS <-> broker
+    CHECK_SUBSCRIPTION("chk_sub"),
+    SUBSCRIPTION_RESULT("sub_res"),
+
     // general purpose
     ERROR("err");
-
 
     private final String val;
 
@@ -29,18 +32,16 @@ public enum ActionType {
         this.val = val;
     }
 
-    @JsonValue    
+    @JsonValue
     public String getVal() {
         return val;
     }
 
     @JsonCreator
-    public static ActionType ofValue(String val) {
+    public static Action ofValue(String val) {
         for (ActionType a : ActionType.values()) {
-            if (a.val.equals(val)) {
-                return a;
-            }
+            if (a.val.equals(val)) return a;
         }
-        throw new IllegalArgumentException("Unknow action: " + val);
+        throw new IllegalArgumentException("Unknown action: " + val);
     }
 }

@@ -22,6 +22,10 @@ public class CommandParser {
             return parseSign(args);
         }
 
+        if (mode.equalsIgnoreCase("kms")) {
+            return parseKms(args);
+        }
+
         throw new IllegalArgumentException("Invalid Mode: " + mode);
     }
 
@@ -34,7 +38,7 @@ public class CommandParser {
                 port = Integer.parseInt(args[i + 1]);
             } else if (args[i].equals("--broker-cert") && i + 1 < args.length) {
                 brokerCertPath = args[i + 1];
-                i++;   
+                i++;
             }
         }
 
@@ -43,7 +47,9 @@ public class CommandParser {
 
     private static ParsedCommand parseClient(String[] args) {
         String host = "localhost";
-        int port = 8080;
+        int port = 8080; // defaul broker port
+        String kmsHost = "localhost";
+        int kmsPort = 9090; // defaul kms port
         String caCertPath = null;
 
         for (int i = 1; i < args.length; i++) {
@@ -52,13 +58,20 @@ public class CommandParser {
                 host = parts[0];
                 port = Integer.parseInt(parts[1]);
                 i++;
+            } else if (args[i].equals("--kms") && i + 1 < args.length) {
+                String[] parts = args[i + 1].split(":");
+                kmsHost = parts[0];
+                kmsPort = Integer.parseInt(parts[1]);
+                i++;
             } else if (args[i].equals("--ca-cert") && i + 1 < args.length) {
                 caCertPath = args[i + 1];
                 i++;
             }
         }
 
-        return ParsedCommand.client(host, port, caCertPath);
+        // Ajuste a assinatura do método factory do ParsedCommand de acordo com o seu
+        // projeto
+        return ParsedCommand.client(host, port, kmsHost, kmsPort, caCertPath);
     }
 
     private static ParsedCommand parseSign(String[] args) {
@@ -71,5 +84,32 @@ public class CommandParser {
         }
 
         return ParsedCommand.sign(username);
+    }
+
+    /**
+     * kms --port <kmsPort> --broker <host>:<port> [--ca-cert <path>]
+     *
+     * Exemplo:
+     * kms --port 9090 --broker localhost:8080 --ca-cert /tmp/ca.crt
+     */
+    private static ParsedCommand parseKms(String[] args) {
+        int kmsPort = 9090;
+        String brokerHost = "localhost";
+        int brokerPort = 8080;
+        String caCertPath = null;
+
+        for (int i = 1; i < args.length; i++) {
+            if (args[i].equals("--port") && i + 1 < args.length) {
+                kmsPort = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("--broker") && i + 1 < args.length) {
+                String[] parts = args[++i].split(":");
+                brokerHost = parts[0];
+                brokerPort = Integer.parseInt(parts[1]);
+            } else if (args[i].equals("--ca-cert") && i + 1 < args.length) {
+                caCertPath = args[++i];
+            }
+        }
+
+        return ParsedCommand.kms(kmsPort, brokerHost, brokerPort, caCertPath);
     }
 }

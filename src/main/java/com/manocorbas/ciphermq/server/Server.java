@@ -33,9 +33,9 @@ public class Server {
             Log.error(COMPONENT, "Error while instantiating CA", e);
         } 
         
-        PublicKey acPublicKey = credentials.publicKey();
-        PrivateKey acPrivateKey = credentials.privateKey();
-        X509Certificate certificate = credentials.certificate();
+        PublicKey brokerPublicKey = credentials.publicKey();
+        PrivateKey brokerPrivateKey = credentials.privateKey();
+        X509Certificate brokCertificate = credentials.certificate();
 
         TopicManager tm = new TopicManager();
         ClientRegistry cr = new ClientRegistry();
@@ -64,9 +64,9 @@ public class Server {
                         new ClientHandler(
                                 client,
                                 bs,
-                                acPublicKey,
-                                acPrivateKey,
-                                certificate
+                                brokerPublicKey,
+                                brokerPrivateKey,
+                                brokCertificate
                         )
                 ).start();
             } catch (Exception e) {

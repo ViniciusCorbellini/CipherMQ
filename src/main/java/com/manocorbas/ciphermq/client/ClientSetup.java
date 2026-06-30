@@ -14,8 +14,6 @@ import com.manocorbas.ciphermq.util.log.Log;
 
 public class ClientSetup {
 
-    private static final Path CLIENTS_DIR = PathUtil.CLIENTS_DIR;
-
     /**
      * Loads the clients's certificate and key pair.0
      * Creates a keypair if the certificate doesn't exist

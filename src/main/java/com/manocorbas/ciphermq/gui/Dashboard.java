@@ -25,6 +25,8 @@ public class Dashboard extends javax.swing.JFrame {
 
     private String host;
     private int port;
+    private String kmsHost;
+    private int kmsPort;
 
     // Mapa: topicName → lista de mensagens acumuladas
     private final Map<String, List<Message>> topicMessages = new LinkedHashMap<>();
@@ -35,9 +37,11 @@ public class Dashboard extends javax.swing.JFrame {
     /**
      * Creates new form Dashboard
      */
-    public Dashboard(String host, int port) {
+    public Dashboard(String host, int port, String kmsHost, int kmsPort) {
         this.port = port;
         this.host = host;
+        this.kmsHost = kmsHost;
+        this.kmsPort = kmsPort;
 
         initComponents();
 
@@ -344,7 +348,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         Client client = new Client();
 
-        ConnectRequest request = new ConnectRequest(this.host, this.port, creds);
+        ConnectRequest request = new ConnectRequest(this.host, this.port, this.kmsHost, this.kmsPort, creds);
 
         try {
             client.connect(request);
@@ -440,7 +444,11 @@ public class Dashboard extends javax.swing.JFrame {
             return;
         }
 
-        client.publish(topic, messageContent);
+        try {
+            client.publish(topic, messageContent);
+        } catch (Exception e) {
+            Log.error("GUI", e.getMessage(), e);
+        }
     }// GEN-LAST:event_sendButtonActionPerformed
 
     private String getStringAndValidateFrom(javax.swing.text.JTextComponent textComponent) {

@@ -7,7 +7,9 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import javax.crypto.SecretKey;
 
 import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.exceptions.HandShakeException;
@@ -20,6 +22,7 @@ import com.manocorbas.ciphermq.server.registry.ClientSession;
 import com.manocorbas.ciphermq.util.FrameUtil;
 import com.manocorbas.ciphermq.util.JsonUtil;
 import com.manocorbas.ciphermq.util.log.Log;
+import com.manocorbas.ciphermq.util.CipherUtil;
 
 public class ClientHandler implements Runnable, ClientConnection {
 
@@ -39,6 +42,9 @@ public class ClientHandler implements Runnable, ClientConnection {
     private PublicKey pubKey;
     private PrivateKey privKey;
     private X509Certificate certificate;
+
+    // Chave de sessão AES derivada do sessionId após o handshake
+    private SecretKey sessionKey;
 
     // thread
     private volatile boolean running = true;
@@ -66,7 +72,7 @@ public class ClientHandler implements Runnable, ClientConnection {
 
             session = doHandShakeAndRegistry();
 
-        } catch (IOException | HandShakeException e) {
+        } catch (IOException | HandShakeException | NoSuchAlgorithmException e) {
             Log.error(COMPONENT, e.getMessage(), e);
             running = false;
         }
@@ -74,7 +80,10 @@ public class ClientHandler implements Runnable, ClientConnection {
         Log.info(COMPONENT, "Listening");
         while (running) {
             try {
-                String json = FrameUtil.receive(in);
+                String frame = FrameUtil.receive(in);
+
+                // Decifra o envelope cliente-broker com a chave de sessão
+                String json = CipherUtil.decryptWithSessionKey(frame, sessionKey);
 
                 Message msg = JsonUtil.fromJson(json, Message.class);
 
@@ -90,7 +99,7 @@ public class ClientHandler implements Runnable, ClientConnection {
                 Log.error(COMPONENT, e.getMessage(), e);
 
             } catch (Exception e) {
-                Log.warn(COMPONENT, "Unexpected error while handling client");
+                Log.warn(COMPONENT, "Unexpected error while handling client: " + e.getMessage());
                 running = false;
             }
         }
@@ -98,12 +107,16 @@ public class ClientHandler implements Runnable, ClientConnection {
         cleanup();
     }
 
-    private ClientSession doHandShakeAndRegistry() throws IOException, HandShakeException {
+    private ClientSession doHandShakeAndRegistry() throws IOException, HandShakeException, NoSuchAlgorithmException {
         Log.info(COMPONENT, "Handshaking");
         HandshakeResult result = serverHandShake.doHandshake(this.pubKey, this.privKey, this.certificate);
 
         if (!result.success())
             throw new HandShakeException("Error while trying to do handshake");
+
+        // Deriva a mesma chave de sessão que o cliente vai derivar
+        this.sessionKey = CipherUtil.deriveSessionKey(result.sessionId());
+        Log.info(COMPONENT, "Session key derived for: " + result.clientName());
 
         return brokerService.register(result.clientName(), this, result.sessionId());
     }
@@ -113,9 +126,12 @@ public class ClientHandler implements Runnable, ClientConnection {
         try {
             String json = JsonUtil.toJson(message);
 
-            FrameUtil.send(out, json);
+            // Cifra com a chave de sessão antes de enviar
+            String encrypted = CipherUtil.encryptWithSessionKey(json, sessionKey);
 
-        } catch (IOException e) {
+            FrameUtil.send(out, encrypted);
+
+        } catch (Exception e) {
             Log.error(COMPONENT, "Error while sending message", e);
             throw new RuntimeException(e);
         }
