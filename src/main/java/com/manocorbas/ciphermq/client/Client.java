@@ -40,16 +40,19 @@ public class Client {
         this.creds = c.credentials();
         this.messageQueue = new ConcurrentLinkedQueue<>();
         this.connection = new ClientConnection(messageQueue, topicKeys);
-        this.kmsConnection = new KmsClientConnection(c.kmsHost(), c.kmsPort(), creds);
-
+        
         HandshakeResult result = connection.connect(c);
-
+        
         this.username = result.clientName();
         this.sessionId = result.sessionId();
-
+        
+        // Gambiarra da porra kkkkkkk
+        this.creds = ClientSetup.load(c.credentials().username());
+        
         SecretKey secretKey = CipherUtil.deriveSessionKey(sessionId);
         this.connection.setSessionKey(secretKey);
-
+        
+        this.kmsConnection = new KmsClientConnection(c.kmsHost(), c.kmsPort(), creds);
         this.connection.startListening();
         fetchTopics();
     }
@@ -130,6 +133,8 @@ public class Client {
         // socket
         long deadline = System.currentTimeMillis() + 5000; // timeout 5s
 
+        boolean received = false;
+
         while (System.currentTimeMillis() < deadline) {
             Message msg = messageQueue.poll();
 
@@ -141,14 +146,66 @@ public class Client {
             // If we get a GET_TOPICS message, we update the subscribedIn set
             if (msg.action() == ActionType.GET_TOPICS) {
                 this.subscribedIn = JsonUtil.fromJson(msg.content(), HashSet.class);
-                return;
+                received = true;
+                break;
             }
 
             // else, we enqueue it back so the dispatcher can proccess it
             messageQueue.add(msg);
         }
 
-        throw new Exception("Timeout waiting for GET_TOPICS response");
+        if (!received) {
+            throw new Exception("Timeout waiting for GET_TOPICS response");
+        }
+
+        // fetching topics keys
+        Log.info(COMPONENT,
+                "Recovering missing E2E topic keys from KMS for " + this.subscribedIn.size() + " topics...");
+
+        for (String topic : this.subscribedIn) {
+
+            if (topicKeys.containsKey(topic)) {
+                continue;
+            }
+
+            try {
+                notifyKms(KmsAction.GET_KEY, topic);
+            }
+
+            catch (Exception e) {
+                Log.error(COMPONENT,
+                        "Failed to recover key from KMS for topic [" + topic + "]: " + e.getMessage(), e);
+            }
+        }
+    }
+
+    public Message decryptE2E(Message msg) {
+
+        if (msg.action() != ActionType.PUBLISH)
+            return msg;
+
+        String topic = msg.topic();
+        SecretKey topicKey = topicKeys.get(topic);
+
+        if (topicKey != null) {
+            try {
+
+                String decryptedContent = CipherUtil.decryptWithSessionKey(msg.content(), topicKey);
+
+                return new Message(msg.action(), topic, decryptedContent, msg.sender(), msg.time());
+
+            } catch (Exception e) {
+                Log.error(COMPONENT, "Failed to decrypt E2E payload for topic: " + topic, e);
+                return new Message(msg.action(), topic, "[ERRO DE CRIPTOGRAFIA: Não foi possível decifrar]",
+                        msg.sender(), msg.time());
+            }
+        }
+
+        Log.warn(COMPONENT, "Received PUBLISH for topic [" + topic + "] but local key is missing.");
+        
+        return new Message(msg.action(), topic, "[ERRO: Chave E2E ausente para este tópico]", msg.sender(),
+                msg.time());
+
     }
 
     public void close() {

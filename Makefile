@@ -25,16 +25,17 @@ clean:
 
 # Runs the jar as specified in maven.apache.org guides
 # example: make run_srv PORT=8080 BROKER_CERT=C:\Users\Cliente\Downloads\broker.crt
-# testing: make run_srv PORT=8080 BROKER_CERT=
+# testing: make run_srv PORT=8080 BROKER_CERT=./sec/broker/vinicius_souza.crt
+# OBS: ANTES DE RODAR O SERVER, COPIE O /SEC/BROKER PARA HOME/.CIPHERMQ/BROKER
 run_srv:
 	java -cp target/CipherMQ-1.0-SNAPSHOT.jar com.manocorbas.ciphermq.App srv --port $(PORT) --broker-cert $(BROKER_CERT)
+
 
 # exemple: make run_cli HOST=172.26.222.123 PORT=8080 CA_CERT=~/Downloads/ca.crt
 # 		   make run_cli HOST=172.26.222.123 PORT=8080 KHOST=172.26.222.123 KPORT=9090 CA_CERT=C:\Users\Cliente\Downloads\ca.crt
 # --kms <kms-host>:<kms-port>
 run_cli:
-	java -cp target/CipherMQ-1.0-SNAPSHOT.jar com.manocorbas.ciphermq.App \
-	  cli --connect $(HOST):$(PORT) --kms $(KHOST):$(KPORT) --ca-cert $(CA_CERT)
+	java -cp target/CipherMQ-1.0-SNAPSHOT.jar com.manocorbas.ciphermq.App cli --connect $(HOST):$(PORT) --kms $(KHOST):$(KPORT) --ca-cert $(CA_CERT)
 
 # exemple: make run_kms PORT=9090 BHOST=172.26.222.123 BPORT=8080 CA_CERT=C:\Users\Cliente\Downloads\ca.crt
 run_kms:

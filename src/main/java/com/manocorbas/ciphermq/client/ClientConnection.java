@@ -2,13 +2,11 @@ package com.manocorbas.ciphermq.client;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Queue;
 
 import javax.crypto.SecretKey;
 
-import com.manocorbas.ciphermq.common.ActionType;
 import com.manocorbas.ciphermq.common.Message;
 import com.manocorbas.ciphermq.exceptions.HandShakeException;
 import com.manocorbas.ciphermq.protocols.handshake.ClientHandShake;
@@ -82,30 +80,6 @@ public class ClientConnection {
 
                     Message msg = JsonUtil.fromJson(json, Message.class);
 
-                    // E2E: Se for uma mensagem publicada em um tópico, descriptografa
-                    if (msg.action() == ActionType.PUBLISH) {
-                        String topic = msg.topic();
-                        SecretKey topicKey = topicKeys.get(topic);
-
-                        if (topicKey != null) {
-                            try {
-                                // Decifra usando a chave simétrica do tópico obtida do KMS
-                                String decryptedContent = CipherUtil.decryptWithSessionKey(msg.content(), topicKey);
-
-                                // Substitui o conteúdo criptografado pelo texto claro original
-                                msg = new Message(msg.action(), topic, decryptedContent, msg.sender(), msg.time());
-
-                            } catch (Exception cryptoEx) {
-                                Log.error(COMPONENT, "Failed to decrypt E2E payload for topic: " + topic, cryptoEx);
-                                msg = new Message(msg.action(), topic,
-                                        "[ERRO DE CRIPTOGRAFIA: Não foi possível decifrar]");
-                            }
-                        } else {
-                            Log.warn(COMPONENT, "Received PUBLISH for topic [" + topic + "] but local key is missing.");
-                            msg = new Message(msg.action(), topic, "[ERRO: Chave E2E ausente para este tópico]");
-                        }
-
-                    }
                     messageQueue.add(msg);
                 }
 

@@ -503,9 +503,11 @@ public class Dashboard extends javax.swing.JFrame {
                         continue;
                     }
 
+                    Message decryptedMsg = client.decryptE2E(msg);
+
                     // SwingUtilities garante que a atualização de UI
                     // acontece na EDT (Event Dispatch Thread) do Swing
-                    SwingUtilities.invokeLater(() -> appendToTopic(msg));
+                    SwingUtilities.invokeLater(() -> appendToTopic(decryptedMsg));
 
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();

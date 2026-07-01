@@ -91,6 +91,9 @@ public class KmsHandshake {
         String json = FrameUtil.receive(socket.getInputStream());
         Message msg = JsonUtil.fromJson(json, Message.class);
 
+        Log.info("KMS", json);
+        Log.info("KMS", msg.content());
+
         if (msg.action() != KmsAction.KMS_CONNECT && msg.action() != KmsAction.KMS_REGISTER) {
             throw new Exception("Expected KMS_CONNECT, got: " + msg.action());
         }
